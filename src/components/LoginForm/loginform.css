@@ -1,0 +1,22 @@
+.login-form {
+  border-radius: 2rem;
+  width: 30%;
+  background-color: white;
+  padding: 2rem;
+  box-shadow: -5px 4px 5px 0px rgba(0,0,0,0.31);
+  -webkit-box-shadow: -5px 4px 5px 0px rgba(0,0,0,0.31);
+  -moz-box-shadow: -5px 4px 5px 0px rgba(0,0,0,0.31);
+}
+
+.login-background {
+  background-color: #2196F3;
+}
+
+.signin-btn {
+    border-radius: 2rem;
+    width: 100%;
+}
+
+p {
+    font-size: 1.2rem;
+}
