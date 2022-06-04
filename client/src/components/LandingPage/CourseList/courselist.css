@@ -1,0 +1,30 @@
+.below-nav {
+  padding-top: 4rem;
+}
+
+h2 {
+    font-size: 4rem;
+    font-weight: 600;
+    padding-left: 1.2rem;
+}
+
+li .container {
+  margin: auto;
+  text-align: center;
+}
+
+.list-group-item {
+  background-color: #fcfcfc;
+  border-radius: 1rem !important;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  border: none !important;
+  -webkit-box-shadow: -3px 2px 5px 0px rgba(0, 0, 0, 0.11); 
+  box-shadow: -3px 2px 5px 0px rgba(0, 0, 0, 0.123);
+}
+
+.list-titles {
+    box-shadow: none;
+    background-color: transparent;
+    font-weight: 600;
+}
