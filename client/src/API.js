@@ -11,5 +11,5 @@ function getAllCourses() {
     });
 }
 
-const API = {getAllCourses};
+const API = { getAllCourses };
 export default API;
