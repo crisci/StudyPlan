@@ -20,7 +20,7 @@ function App() {
 
 function MainApp() {
 
-  const [user, setUser] = useState();
+  const [user, setUser] = useState({id: "1", nome: "Luigi", cognome: "Crisci", email: "test@polito.it"});
 
   return(
     <Routes>

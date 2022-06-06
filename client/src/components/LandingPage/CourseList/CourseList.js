@@ -1,27 +1,32 @@
 import { useState } from "react";
-import { Container, ListGroup } from "react-bootstrap";
+import { Container, ListGroup, Spinner } from "react-bootstrap";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import './courselist.css';
 
 function CourseList(props) {
+    
 
     return (
-        <Container fluid className="vh-100">
-            <h2>Courses List</h2>
-            <ListGroup variant="flush" className="px-3">
-                <ListGroup.Item key="title" as='li' className="d-flex justify-content-beetween list-titles">
-                    <Container>Codice</Container>
-                    <Container>Corso</Container>
-                    <Container>CFU</Container>
-                    <Container>Tot Studenti</Container>
-                    <Container>Max Studenti</Container>
-                    <Container>Incompatibilità/Propedeuticità</Container>
-                </ListGroup.Item>
-                {props.courses.map((course, index) => <CourseItem key={course.codice} course={course} />)} {/* Key should be specified inside the array. */}
-            </ListGroup>
-
-
-        </Container>
+        <>
+            {
+                props.loading
+                    ? <Spinner animation="border" variant="primary" />
+                    : <Container fluid className="vh-100">
+                    <h2>Courses List</h2>
+                    <ListGroup variant="flush" className="px-3">
+                        <ListGroup.Item key="title" as='li' className="d-flex justify-content-beetween list-titles">
+                            <Container>Codice</Container>
+                            <Container>Corso</Container>
+                            <Container>CFU</Container>
+                            <Container>Tot Studenti</Container>
+                            <Container>Max Studenti</Container>
+                            <Container>Incompatibilità/Propedeuticità</Container>
+                        </ListGroup.Item>
+                        {props.courses.map((course, index) => <CourseItem key={course.codice} course={course} />)} {/* Key should be specified inside the array. */}
+                    </ListGroup>
+                </Container>
+            }
+        </>
     );
 }
 

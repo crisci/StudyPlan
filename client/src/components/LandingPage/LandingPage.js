@@ -10,10 +10,15 @@ function LandingPage(props) {
 
     const [courses, setCourses] = useState([]);
     const [plan, setPlan] = useState([]);
+    const [coursesLoading, setCoursesLoading] = useState(false);
 
     useEffect(() => {
+        setCoursesLoading(true);
         API.getAllCourses().then(
-            courses => setCourses(courses)
+            courses => {
+                setCourses(courses);
+                setCoursesLoading(false);
+            }
         );
     }, [])
 
@@ -21,10 +26,10 @@ function LandingPage(props) {
 
     return(
         <>
-        <Nav/>
+        <Nav user={props.user}/>
         <Container fluid style={{paddingTop: "4rem"}} className="text-center">
             {props.user?.id ? <UserView user={props.user} plan={plan}/> : false}
-            <CourseList courses={courses}/>
+            <CourseList loading={coursesLoading} courses={courses}/>
         </Container>
         </>
     )
