@@ -6,14 +6,8 @@ import './courselist.css';
 function CourseList(props) {
 
     return (
-        <Container fluid className="vh-100 below-nav">
-            {
-                props.user
-                    ? props.plan
-                        ? <h2>Your Plan</h2>
-                        : <h2>Courses List</h2>
-                    : <h2>Courses List</h2>
-            }
+        <Container fluid className="vh-100">
+            <h2>Courses List</h2>
             <ListGroup variant="flush" className="px-3">
                 <ListGroup.Item key="title" as='li' className="d-flex justify-content-beetween list-titles">
                     <Container>Codice</Container>

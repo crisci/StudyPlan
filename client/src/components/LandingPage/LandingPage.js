@@ -1,25 +1,31 @@
 import { useEffect, useState } from "react";
+import { Container } from "react-bootstrap";
 import API from "../../API";
-import CourseList from "./CourseList/CourseList";
 import Nav from "./Navbar/Navbar";
+import CourseList from "./CourseList/CourseList";
+import UserView from "./UserView/UserView";
 
 
 function LandingPage(props) {
 
     const [courses, setCourses] = useState([]);
+    const [plan, setPlan] = useState([]);
 
     useEffect(() => {
-        if(!courses.length)
         API.getAllCourses().then(
             courses => setCourses(courses)
         );
     }, [])
 
 
+
     return(
         <>
         <Nav/>
-        <CourseList courses={courses}/>
+        <Container fluid style={{paddingTop: "4rem"}} className="text-center">
+            {props.user?.id ? <UserView user={props.user} plan={plan}/> : false}
+            <CourseList courses={courses}/>
+        </Container>
         </>
     )
 }

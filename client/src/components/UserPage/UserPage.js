@@ -12,15 +12,15 @@ function UserPage(props) {
 
                         <Form.Group className="mb-3">
                             <Form.Label>Name</Form.Label>
-                            <Form.Control type="email" value={props.nome} disabled />
+                            <Form.Control type="email" value={props.user.nome} disabled />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Surname</Form.Label>
-                            <Form.Control type="email" value={props.cognome} disabled />
+                            <Form.Control type="email" value={props.user.cognome} disabled />
                         </Form.Group>
                         <Form.Group className="mb-3">
                             <Form.Label>Email address</Form.Label>
-                            <Form.Control type="email" value={props.email} disabled />
+                            <Form.Control type="email" value={props.user.email} disabled />
                         </Form.Group>
 
                         <Button variant='danger' className='btn w-100 logout-btn'>Log out</Button>
