@@ -4,27 +4,30 @@ import { Container, Form, Col, Row, Button, Alert } from "react-bootstrap";
 
 function LoginForm(props) {
 
-    const [email, setEmail] = useState('full@polito.it');
+    const [username, setUsername] = useState('full@polito.it');
     const [password, setPassword] = useState('password');
     const [errorMessage, setErrorMessage] = useState("");
+
+    const usernameValidation = (username) => {
+        return String(username)
+            .toLowerCase()
+            .match(
+                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            );
+    };
+
 
     const handleSubmit = (event) => {
         event.preventDefault();
         setErrorMessage();
-
-        const emailValidation = (email) => {
-            return String(email)
-              .toLowerCase()
-              .match(
-                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-              );
-          };
-
-        //email validation
-        if (!emailValidation(email)) {
-            setErrorMessage("Email not valid.");
+        //username validation
+        if (!usernameValidation(username)) {
+            setErrorMessage("username not valid.");
+        } else if (password.trim() === '') {
+            setErrorMessage('Password is mandatory.')
         } else {
             //login
+            props.login({ username: username, password: password });
         }
     }
 
@@ -40,9 +43,9 @@ function LoginForm(props) {
                         </Alert>
                         : ''}
                     <Form noValidate onSubmit={handleSubmit}>
-                        <Form.Group className="mb-3" controlId='email'>
-                            <Form.Label>Email address</Form.Label>
-                            <Form.Control type="email" value={email} onChange={(event) => { setEmail(event.target.value) }} />
+                        <Form.Group className="mb-3" controlId='username'>
+                            <Form.Label>username address</Form.Label>
+                            <Form.Control type="username" value={username} onChange={(event) => { setUsername(event.target.value) }} />
                         </Form.Group>
                         <Form.Group controlId='password'>
                             <Form.Label>Password</Form.Label>
