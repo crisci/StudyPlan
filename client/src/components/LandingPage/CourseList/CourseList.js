@@ -22,7 +22,7 @@ function CourseList(props) {
                             <Container>Max Studenti</Container>
                             <Container>Incompatibilità/Propedeuticità</Container>
                         </ListGroup.Item>
-                        {props.courses.map((course, index) => <CourseItem key={course.codice} course={course} />)} {/* Key should be specified inside the array. */}
+                        {props.courses.map(course => <CourseItem key={course.codice} course={course} />)} {/* Key should be specified inside the array. */}
                     </ListGroup>
                 </Container>
             }

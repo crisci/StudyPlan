@@ -1,8 +1,9 @@
+import { useState } from "react";
 import { Button, Container } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function UserView(props) {
-    
+function UserView(props) { 
+
     return (
         <Container fluid className="mb-4">
             <h2>Welcome, {props.user?.nome}</h2>
@@ -25,5 +26,6 @@ function StudyPlanNotAvailable(props) {
         </Container>
     );
 }
+
 
 export default UserView;

@@ -1,7 +1,7 @@
 import { Container, Navbar } from "react-bootstrap";
 import { FaUserGraduate } from 'react-icons/fa';
 import { BsPersonCircle } from 'react-icons/bs';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 
 function Nav(props) {
@@ -16,7 +16,7 @@ function Nav(props) {
                 {/* <Form onSubmit={event => event.preventDefault()}>
                     <Form.Control type="text" placeholder="Search"></Form.Control>
                 </Form> */}
-                <BsPersonCircle style={{ cursor: "pointer" }} color='white' size='30px' onClick={() => { props.user?.id ? navigate('/user') : navigate('/login') }} />
+                <BsPersonCircle style={{ cursor: "pointer" }} color='white' size='30px' onClick={() => { props.user?.id ? navigate(`/userPage`) : navigate('/login') }} />
             </Container>
         </Navbar >
     );

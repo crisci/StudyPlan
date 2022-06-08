@@ -1,7 +1,10 @@
 import './userpage.css'
 import { Container, Col, Row, Button, Form } from "react-bootstrap";
+import { useNavigate } from 'react-router-dom';
 
 function UserPage(props) {
+
+    const navigate = useNavigate();
 
 
     function handleLogout() {
@@ -27,9 +30,14 @@ function UserPage(props) {
                             <Form.Label>Email address</Form.Label>
                             <Form.Control type="email" value={props.user.username} disabled />
                         </Form.Group>
+                        <Form.Group className="mb-3">
+                            <Form.Label>Type</Form.Label>
+                            <Form.Control type="email" value={props.user.full_time ? "Full time" : "Part time"} disabled />
+                        </Form.Group>
 
                     </Form>
-                    <Button variant='danger' className='btn w-100 logout-btn' onClick={() => handleLogout()}>Log out</Button>
+                    <Button variant='primary' className='btn w-50 logout-btn w-50' onClick={() => {navigate('/')}}>Home</Button>
+                    <Button variant='danger' className='btn w-50 logout-btn' onClick={() => handleLogout()}>Log out</Button>
                 </Container>
             </Col>
         </Row>
