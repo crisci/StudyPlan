@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Button, Row, Col, Container, ListGroup } from "react-bootstrap";
+import { Form, Button, Row, Col, Container, ListGroup, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { BsXCircleFill } from "react-icons/bs";
 
@@ -8,7 +8,8 @@ function PlanForm(props) {
 
 
     const [currentCourse, setCurrentCourse] = useState(''); //form's value
-    const [planType, setPlanType] = useState(); //0 full time, 1 part time
+    const [planType, setPlanType] = useState(props.type); //1 full time, 0 part time
+    const [error, setError] = useState("");
     const navigate = useNavigate();
 
     function validateCouse(codice) {
@@ -29,50 +30,96 @@ function PlanForm(props) {
 
     const handleCancel = () => {
         props.cancelCurrentPlan();
-        if(props.add) {
+        if (props.add) {
             props.setAdd(false);
         } else {
             props.setEdit(false);
         }
+        setPlanType();
         navigate('/');
     }
 
     const handleSave = () => {
-        if(props.add) {
+        if (props.add) {
             props.setAdd(false);
         } else {
             props.setEdit(false);
         }
-        props.saveCurrentPlan();
+        props.saveCurrentPlan(planType);
+    }
+
+    function handleSwitchType(value) {
+        switch (value) {
+            case 0:
+                if (props.currentCrediti > 40) {
+                    setError("Numero di CFU troppo elevato per selezionare part time.");
+                } else {
+                    setPlanType(value);
+                }
+                break;
+
+            default:
+                setPlanType(value);
+                break;
+        }
     }
 
     function handleX(codice, crediti) {
         props.deleteCourseFromPlan(codice, crediti);
     }
 
+    function disableSave() {
+        switch (planType) {
+            case 1:
+                if (props.currentCrediti < 40 || props.currentCrediti > 80) {
+                    return true;
+                }
+                break;
+            case 0:
+                if (props.currentCrediti < 20 || props.currentCrediti > 40) {
+                    return true;
+                }
+                break;
+
+            default:
+                return true;
+        }
+        return false;
+    }
+
+
+
+
 
     return (
         <div>
-            <p style={{ fontWeight: "600", fontSize: "3.5rem", margin: "0", paddingBottom:"10px" }}> {props.add ? "Add Plan" : "Edit Plan"}</p>
-                <Row className="w-100 m-auto">
-                    <Form className="d-flex justify-content-center mb-3">
-                        <Form.Group className="d-flex me-3" onChange={() => setPlanType(0)}>
-                            <Form.Label>Full Time</Form.Label>
-                            <Form.Check type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                            </Form.Check>
-                        </Form.Group>
-                        <Form.Group className="d-flex ms-3" onChange={() => setPlanType(1)}>
-                            <Form.Label>Part Time</Form.Label>
-                            <Form.Check type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                            </Form.Check>
-                        </Form.Group>
-                    </Form>
-                </Row>
+            <p style={{ fontWeight: "600", fontSize: "3.5rem", margin: "0", paddingBottom: "10px" }}> {props.add ? "Add Plan" : "Edit Plan"}</p>
+            <Row className="w-100 m-auto">
+                {error ? <Alert variant='danger' onClose={() => { setError(''); }} dismissible>{error}</Alert> : false}
+                {/* <Form className="d-flex justify-content-center mb-3">
+                    <Form.Group className="d-flex me-3" onChange={() => handleSwitchType(1)}>
+                        <Form.Label>Full Time</Form.Label>
+                        <Form.Check type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                        </Form.Check>
+                    </Form.Group>
+                    <Form.Group className="d-flex ms-3" onChange={() => handleSwitchType(0)}>
+                        <Form.Label>Part Time</Form.Label>
+                        <Form.Check type="radio" name="flexRadioDefault" id="flexRadioDefault1">
+                        </Form.Check>
+                    </Form.Group>
+                </Form> */}
+                <Container className="mb-3">
+                    <Button className="m-auto text-center rounded-pill me-2" onClick={() => handleSwitchType(1)}>Full Time</Button>
+                    <Button className="m-auto text-center rounded-pill ms-2" onClick={() => handleSwitchType(0)}>Part Time</Button>
+                </Container>
+                <p>{planType !== null ?  planType ? "Type select: Full Time" : "Type select: Part Time" : "Seleziona il piano di studi per continuare"}</p>
+            </Row>
+
             <Form onSubmit={handleAdd} className="d-flex m-auto mb-3">
                 <Row className="justify-content-center w-100">
                     <Col className="col-md-4">
                         <Form.Group className="m-auto">
-                            <Form.Control as="select" value={currentCourse} onChange={(event) => { setCurrentCourse(event.target.value) }} disabled={planType === undefined}>
+                            <Form.Control as="select" value={currentCourse} onChange={(event) => { setCurrentCourse(event.target.value) }} disabled={planType === null}>
                                 <option hidden value=''>Select a course...</option>
                                 {
                                     // Filter the entire list in order to select only the available courses based on currentPlan
@@ -96,10 +143,17 @@ function PlanForm(props) {
                 </Row>
             </Form>
             {props.currentPlan.length ? <PlanList currentPlan={props.currentPlan} handleX={handleX} /> : false}
-            <p>CFU: {props.currentCrediti}</p>
+            <Row>
+                <p>CFU: {props.currentCrediti}</p>
+                <p>
+                    {planType !== null
+                        ? planType ? "Min CFU: 40 - Max CFU: 80" : "Min CFU: 20 - Max CFU: 40"
+                        : false}
+                </p>
+            </Row>
             <Row className="justify-content-center">
                 <Col className="col-md-1"> <Button className="rounded-pill w-100" variant="danger" onClick={handleCancel}> Cancel </Button> </Col>
-                <Col className="col-md-1"> <Button className="rounded-pill w-100" variant="success" onClick={handleSave} > Save </Button></Col>
+                <Col className="col-md-1"> <Button className="rounded-pill w-100" variant="success" onClick={handleSave} disabled={disableSave()}> Save </Button></Col>
             </Row>
         </div>
     )
