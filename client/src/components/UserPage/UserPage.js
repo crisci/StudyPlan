@@ -30,10 +30,6 @@ function UserPage(props) {
                             <Form.Label>Email address</Form.Label>
                             <Form.Control type="email" value={props.user.username} disabled />
                         </Form.Group>
-                        <Form.Group className="mb-3">
-                            <Form.Label>Type</Form.Label>
-                            <Form.Control type="email" value={props.user.full_time ? "Full time" : "Part time"} disabled />
-                        </Form.Group>
 
                     </Form>
                     <Button variant='primary' className='btn w-50 logout-btn w-50' onClick={() => {navigate('/')}}>Home</Button>

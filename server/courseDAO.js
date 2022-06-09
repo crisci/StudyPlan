@@ -6,7 +6,7 @@ const db = new sqlite.Database('exam.db',
 
 exports.getAllCourses = () => {
     return new Promise((resolve, reject) => {
-        db.all(`SELECT * FROM courses ORDER BY nome ASC`, (err, rows) => {
+        db.all(`SELECT * FROM courses ORDER BY titolo ASC`, (err, rows) => {
             if (err) reject(err);
             resolve(rows);
         })

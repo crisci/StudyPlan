@@ -8,6 +8,7 @@ const session = require('express-session');
 const cors = require('cors');
 const courseDAO = require('./courseDAO');
 const userDAO = require('./userDAO');
+const planDAO = require('./planDAO');
 
 
 const app = express();
@@ -95,6 +96,19 @@ app.get('/api/sessions/current', (req, res) => {
     }
 }
 );
+
+//plan API
+app.get('/api/plans', isLoggedIn, (req, res) => {
+    if(req.user.available) {
+        planDAO.getPlanByUser(req.user.id)
+        .then(plan => res.json(plan))
+        .catch(err => res.status(500).json(err))
+
+    } else {
+        res.json({message: "no plan available"});
+    }
+
+})
 
 
 app.listen(port, () => {

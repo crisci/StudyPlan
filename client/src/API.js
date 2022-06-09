@@ -11,6 +11,17 @@ function getAllCourses() {
   });
 }
 
+function getPlan() {
+  return new Promise((resolve, reject) => {
+    fetch(`${APIURL}/plans`, {credentials: 'include'})
+      .then(res => {
+        if(res.ok) {
+          resolve(res.json());
+        }
+      })
+  });
+}
+
 //  ! If you want to use return Promise
 //  ! remember to resolve(something).
 async function logIn(credentials) {
@@ -53,5 +64,5 @@ function getUserInfo() {
 
 }
 
-const API = { getAllCourses, logIn, logOut, getUserInfo };
+const API = { getAllCourses, logIn, logOut, getUserInfo, getPlan };
 export default API;

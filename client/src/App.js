@@ -27,19 +27,50 @@ function MainApp() {
   const [user, setUser] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
   const [courses, setCourses] = useState([]);
-  const [plan, setPlan] = useState([]);
+  const [plan, setPlan] = useState(); //used to store the database informations
+  const [crediti, setCrediti] = useState();
+  const [currentPlan, setCurrentPlan] = useState([]); //used for the visualization in PlanForm
+  const [currentCrediti, setCurrentCrediti] = useState(0); //keep trak of the added courses, if unde the edit, nothing change.
   const [coursesLoading, setCoursesLoading] = useState(false);
+  const [add, setAdd] = useState(false);
+  const [edit, setEdit] = useState(false);
 
   useEffect(() => {
-      setCoursesLoading(true);
-      API.getAllCourses().then(
-          courses => {
-              setCourses(courses);
-              setCoursesLoading(false);
-          }
-      );
-  }, [])
+    setCoursesLoading(true);
+    API.getAllCourses().then(
+      courses => {
+        setCourses(courses);
+        setCoursesLoading(false);
+      }
+    );
+  }, []);
 
+  //prendo per la prima volta i dati relativi al piano di studi dopo essere loggato
+  useEffect(() => {
+    if (loggedIn) {
+      API.getPlan().then(
+        plan => {
+          if (!plan.message) {
+            setPlan(plan); //if there is a plan saved it could be also empty => []
+            setCrediti(plan ? plan.map(p => p.crediti).reduce(((accumulator, value) => accumulator + value), 0) : 0);
+          }
+        }
+      )
+    } else {
+      setPlan(); // = undefinded
+      setCrediti(0);
+    }
+  }, [loggedIn]);
+
+  //if edit or add
+  //ogni volta che devo aggiungere o modifico passo tutto a current plan
+  //che contiene una copia dei dati persistenti sul db
+  useEffect(() => {
+    if (add || edit) {
+      setCurrentPlan(plan ? plan : []);
+      setCurrentCrediti(crediti);
+    }
+  }, [plan, setCurrentPlan, add, edit])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -56,7 +87,7 @@ function MainApp() {
     };
 
     checkAuth();
-  }, [])
+  }, []);
 
   const doLogIn = (credentials) => {
     API.logIn(credentials)
@@ -79,19 +110,39 @@ function MainApp() {
   }
 
   const addCourseToPlan = (course) => {
-    setPlan(oldPlan => [...oldPlan, course]);
+    setCurrentPlan(oldPlan => [...oldPlan, course]);
+    setCurrentCrediti(oldCrediti => oldCrediti + course.crediti);
   }
 
-  const cancelPlan = () => {
-    setPlan([]);
+  const deleteCourseFromPlan = (codice, crediti) => {
+    setCurrentPlan(currentPlan.filter(p => p.codice !== codice));
+    setCurrentCrediti(oldCrediti => oldCrediti - crediti);
   }
- 
+
+  const cancelCurrentPlan = () => {
+    setCurrentPlan([]);
+    setCurrentCrediti(0);
+  }
+
+  const saveCurrentPlan = () => {
+    setPlan(currentPlan);
+    setCrediti(currentCrediti);
+    setCurrentPlan([]);
+    setCurrentCrediti(0);
+    navigate('/');
+  }
+
+
   return (
     <Routes>
-      <Route path="/" element={<LandingPage user={user} courses={courses} plan={plan}/>} >
-        <Route path="addPlan" element={!loggedIn ? <Navigate to='/login'/> : <PlanForm plan={plan} courses={courses} addCourseToPlan={addCourseToPlan} cancelPlan={cancelPlan}/>} />
+      <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} />} >
+        <Route path="editPlan" element={!loggedIn
+          ? <Navigate to='/login' />
+          : <PlanForm type={user.available} currentPlan={currentPlan} courses={courses} 
+            addCourseToPlan={addCourseToPlan} cancelCurrentPlan={cancelCurrentPlan} deleteCourseFromPlan={deleteCourseFromPlan} 
+            saveCurrentPlan={saveCurrentPlan} currentCrediti={currentCrediti} add={add} setAdd={setAdd} setEdit={setEdit} />} />
       </Route>
-      <Route path="/userPage" element={!loggedIn ? <Navigate to="/login" /> : <UserPage user={user} logout={doLogOut}/>} />
+      <Route path="/userPage" element={!loggedIn ? <Navigate to="/login" /> : <UserPage user={user} logout={doLogOut} />} />
       <Route path="/login" element={loggedIn ? <Navigate to="/" /> : <LoginForm login={doLogIn} />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
