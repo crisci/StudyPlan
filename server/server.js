@@ -110,6 +110,18 @@ app.get('/api/plans', isLoggedIn, (req, res) => {
 
 })
 
+app.post('/api/plans/addPlan', isLoggedIn, async (req, res) => {
+    const plan = req.body;
+    const planProms = plan.map(course => planDAO.addCourseToPlan(req.user.id, course.codice));
+    try {
+        await Promise.all(planProms);
+        res.status(200).json(plan);
+    } catch (error) {
+        res.status(200).json({error: "Some courses are already inserted"});
+        return;
+    }
+})
+
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);

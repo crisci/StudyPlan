@@ -139,8 +139,8 @@ function MainApp() {
   }
 
   const saveCurrentPlan = (type) => {
-    setPlan(currentPlan);
-    setCrediti(currentCrediti);
+    setCurrentPlan(currentPlan);
+    setCurrentCrediti(currentCrediti);
     setCurrentType(type);
     setCurrentPlan([]);
     setCurrentCrediti(0);

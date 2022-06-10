@@ -12,20 +12,14 @@ function PlanForm(props) {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    function validateCouse(codice) {
-        // on Tot students, Incompatibilità and Propedeuticità or the same exam
-        return true;
-    }
+
 
     const handleAdd = (event) => {
         event.preventDefault();
-        if (!validateCouse(currentCourse)) {
-            return;
-        } else {
             const current = props.courses.find(course => course.codice === currentCourse);
             props.addCourseToPlan(current);
             setCurrentCourse('');
-        }
+        
     }
 
     const handleCancel = () => {
@@ -64,8 +58,12 @@ function PlanForm(props) {
         }
     }
 
-    function handleX(codice, crediti) {
-        props.deleteCourseFromPlan(codice, crediti);
+    function handleX(course) {
+        if(props.currentPlan.map(p => p.propedeuticita).find(propedeuticita => propedeuticita === course.codice)) {
+            setError('Non puoi eliminare il corso poichè propedeutico.')
+        } else {
+            props.deleteCourseFromPlan(course.codice, course.crediti);
+        }
     }
 
     function disableSave() {
@@ -87,27 +85,11 @@ function PlanForm(props) {
         return false;
     }
 
-
-
-
-
     return (
         <div>
             <p style={{ fontWeight: "600", fontSize: "3.5rem", margin: "0", paddingBottom: "10px" }}> {props.add ? "Add Plan" : "Edit Plan"}</p>
             <Row className="w-100 m-auto">
-                {error ? <Alert variant='danger' onClose={() => { setError(''); }} dismissible>{error}</Alert> : false}
-                {/* <Form className="d-flex justify-content-center mb-3">
-                    <Form.Group className="d-flex me-3" onChange={() => handleSwitchType(1)}>
-                        <Form.Label>Full Time</Form.Label>
-                        <Form.Check type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                        </Form.Check>
-                    </Form.Group>
-                    <Form.Group className="d-flex ms-3" onChange={() => handleSwitchType(0)}>
-                        <Form.Label>Part Time</Form.Label>
-                        <Form.Check type="radio" name="flexRadioDefault" id="flexRadioDefault1">
-                        </Form.Check>
-                    </Form.Group>
-                </Form> */}
+                {error ? <Alert className="w-25 m-auto mb-3" variant='danger' onClose={() => { setError(''); }} dismissible>{error}</Alert> : false}
                 <Container className="mb-3">
                     <Button className="m-auto text-center rounded-pill me-2" onClick={() => handleSwitchType(1)}>Full Time</Button>
                     <Button className="m-auto text-center rounded-pill ms-2" onClick={() => handleSwitchType(0)}>Part Time</Button>
@@ -175,7 +157,7 @@ function PlanList(props) {
                         <Container>{course.codice}</Container>
                         <Container>{course.titolo}</Container>
                         <Container>{course.crediti}</Container>
-                        <Container ><BsXCircleFill style={{ cursor: "pointer" }} color="red" size="20px" onClick={() => props.handleX(course.codice, course.crediti)} /></Container>
+                        <Container ><BsXCircleFill style={{ cursor: "pointer" }} color="red" size="20px" onClick={() => props.handleX(course)} /></Container>
                     </ListGroup.Item>)
             }
         </ListGroup>

@@ -7,7 +7,7 @@ function CourseList(props) {
 
 
     return (
-        <>
+        <Container fluid className="mt-4">
             {
                 props.loading
                     ? <Spinner animation="border" variant="primary" />
@@ -26,7 +26,7 @@ function CourseList(props) {
                         </ListGroup>
                     </Container>
             }
-        </>
+        </Container>
     );
 }
 

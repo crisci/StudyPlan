@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 function UserView(props) {
 
     return (
-        <Container fluid className="mb-4">
+        <Container fluid>
             <h2>Welcome, {props.user?.nome}</h2>
             {!(props.user.available === null)
                 ? <StudyPlanAvailable type={props.user.available} crediti={props.crediti} edit={props.edit} setEdit={props.setEdit} plan={props.plan} />
