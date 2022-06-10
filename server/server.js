@@ -92,34 +92,48 @@ app.get('/api/sessions/current', (req, res) => {
     if (req.isAuthenticated()) {
         res.status(200).json(req.user);
     } else {
-        res.status(401).json({ error: "Unauthenticated user!" })
+        res.status(401).json({ errMessage: "Unauthenticated user!" })
     }
 }
 );
 
 //plan API
 app.get('/api/plans', isLoggedIn, (req, res) => {
-    if(req.user.available) {
-        planDAO.getPlanByUser(req.user.id)
+     // TODO: if req.user.available => validation
+    planDAO.getPlanByUser(req.user.id)
         .then(plan => res.json(plan))
-        .catch(err => res.status(500).json(err))
-    } else {
-        res.json({message: "no plan available"});
-    }
-
+        .catch(err => res.status(500).json(err));
 })
 
 app.post('/api/plans/addPlan', isLoggedIn, async (req, res) => {
-    const plan = req.body;
-    const planProms = plan.map(course => planDAO.addCourseToPlan(req.user.id, course.codice));
     try {
-        await Promise.all(planProms);
-        res.status(200).json(plan);
+        await Promise.all(req.body.map(course => planDAO.addCourseToPlan(req.user.id, course.codice))); //array of proms that execute the query for the single course
+        await planDAO.updateStudentsCount();
+        res.status(200).json(req.body);
     } catch (error) {
-        res.status(200).json({error: "Some courses are already inserted"});
+        res.status(200).json(({ errMessage: "Some courses are already inserted", errType: error }));
         return;
     }
-})
+});
+
+app.delete('/api/plans/deletePlan', isLoggedIn, (req, res) => {
+    // TODO: if req.user.available => validation
+    planDAO.deletePlan(req.user.id).then(() => planDAO.updateStudentsCount())
+        .then(() => res.status(200).json({ message: "Delete success" }))
+        .catch(err => ({ errMessage: `Delete went wrong for the user ${req.user.id}`, errType: err }));
+});
+
+app.put('/api/plans/updatePlan', isLoggedIn, async (req, res) => {
+    try {
+        await planDAO.deletePlan(req.user.id);
+        await Promise.all(req.body.map(course => planDAO.addCourseToPlan(req.user.id, course.codice)));
+        await planDAO.updateStudentsCount();
+        res.status(200).json(req.body);
+    } catch (error) {
+        res.status(200).json({ errMessage: `Plan update failed for user ${req.user.id}`, errType: error })
+    }
+
+});
 
 
 app.listen(port, () => {
