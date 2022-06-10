@@ -96,7 +96,6 @@ function PlanForm(props) {
                 </Container>
                 <p>{planType !== null ?  planType ? "Type select: Full Time" : "Type select: Part Time" : "Seleziona il piano di studi per continuare"}</p>
             </Row>
-
             <Form onSubmit={handleAdd} className="d-flex m-auto mb-3">
                 <Row className="justify-content-center w-100">
                     <Col className="col-md-4">

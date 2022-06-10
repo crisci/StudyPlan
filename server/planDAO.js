@@ -2,7 +2,7 @@ const sqlite = require('sqlite3');
 const db = new sqlite.Database('exam.db',
     (err) => { if (err) throw err; }
 );
-
+db.run(`PRAGMA foreign_key = ON`);
 
 //get plan related to the user
 exports.getPlanByUser = (userId) => {
@@ -15,7 +15,6 @@ exports.getPlanByUser = (userId) => {
                 if(rows === undefined) {
                     resolve({error: "user not found"});
                 } else {
-                    console.log(rows);
                     const userPlan = rows.filter(row => row.courseId !== null).map(row => Object.assign({}, {codice: row.courseId, titolo: row.titolo, crediti: row.crediti}));
                     resolve(userPlan)
                 }
@@ -31,7 +30,6 @@ exports.addCourseToPlan = (userId, courseId) => {
         [userId, courseId], (err) => {
             if (err) {
                 reject(err);
-                console.log(err);
                 return;
             } else {
                 resolve(null);

@@ -68,7 +68,7 @@ function CourseItem(props) {
             setPropedeutico(false);
             setSelected(false);
         }
-    }, [props.course.codice, props.course.incompatibilita, props.course.propedeuticita, props.currentPlan, props.add, props.edit])
+    }, [props.course.codice, props.course.incompatibilita, props.course.propedeuticita, props.currentPlan.length, props.add, props.edit])
 
 
 

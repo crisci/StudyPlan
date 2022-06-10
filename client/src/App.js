@@ -49,7 +49,7 @@ function MainApp() {
 
   //prendo per la prima volta i dati relativi al piano di studi dopo essere loggato
   useEffect(() => {
-    if (loggedIn) {
+    if (loggedIn && user.available) {
       API.getPlan().then(
         plan => {
           if (!plan.message) {
@@ -136,6 +136,7 @@ function MainApp() {
   const cancelCurrentPlan = () => {
     setCurrentPlan([]);
     setCurrentCrediti(0);
+    navigate('/'); // TODO: Remember to delete the function handleCancel in PlanForm
   }
 
   const saveCurrentPlan = (type) => {

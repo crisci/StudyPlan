@@ -103,7 +103,6 @@ app.get('/api/plans', isLoggedIn, (req, res) => {
         planDAO.getPlanByUser(req.user.id)
         .then(plan => res.json(plan))
         .catch(err => res.status(500).json(err))
-
     } else {
         res.json({message: "no plan available"});
     }
