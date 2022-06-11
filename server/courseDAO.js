@@ -13,6 +13,20 @@ exports.getAllCourses = () => {
     });
 }
 
+exports.updateStudentsCount = () => {
+    return new Promise((resolve, reject) => {
+        db.run('UPDATE courses SET tot_studenti = (SELECT COUNT(*) FROM plans WHERE plans.courseId = courses.codice)',
+            (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(null);
+                }
+            });
+    });
+}
+
+
 
 
 

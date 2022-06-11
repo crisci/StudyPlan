@@ -108,7 +108,7 @@ app.get('/api/plans', isLoggedIn, (req, res) => {
 app.post('/api/plans/addPlan', isLoggedIn, async (req, res) => {
     try {
         await Promise.all(req.body.map(course => planDAO.addCourseToPlan(req.user.id, course.codice))); //array of proms that execute the query for the single course
-        await planDAO.updateStudentsCount();
+        await courseDAO.updateStudentsCount();
         res.status(200).json(req.body);
     } catch (error) {
         res.status(200).json(({ errMessage: "Some courses are already inserted", errType: error }));
@@ -118,7 +118,7 @@ app.post('/api/plans/addPlan', isLoggedIn, async (req, res) => {
 
 app.delete('/api/plans/deletePlan', isLoggedIn, (req, res) => {
     // TODO: if req.user.available => validation
-    planDAO.deletePlan(req.user.id).then(() => planDAO.updateStudentsCount())
+    planDAO.deletePlan(req.user.id).then(() => courseDAO.updateStudentsCount())
         .then(() => res.status(200).json({ message: "Delete success" }))
         .catch(err => ({ errMessage: `Delete went wrong for the user ${req.user.id}`, errType: err }));
 });
@@ -127,7 +127,7 @@ app.put('/api/plans/updatePlan', isLoggedIn, async (req, res) => {
     try {
         await planDAO.deletePlan(req.user.id);
         await Promise.all(req.body.map(course => planDAO.addCourseToPlan(req.user.id, course.codice)));
-        await planDAO.updateStudentsCount();
+        await courseDAO.updateStudentsCount();
         res.status(200).json(req.body);
     } catch (error) {
         res.status(200).json({ errMessage: `Plan update failed for user ${req.user.id}`, errType: error })
