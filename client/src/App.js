@@ -49,7 +49,7 @@ function MainApp() {
 
   //prendo per la prima volta i dati relativi al piano di studi dopo essere loggato
   useEffect(() => {
-    if (loggedIn && user.available) {
+    if (loggedIn && user.available !== null) {
       API.getPlan().then(
         plan => {
           if (!plan.message) {
@@ -87,8 +87,7 @@ function MainApp() {
         setLoggedIn(true);
         setUser(user);
       } catch (err) {
-        //GET http://localhost:3001/api/sessions/current
-        //[HTTP/1.1 401 Unauthorized]
+        console.error(err.error);
       }
     };
 

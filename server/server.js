@@ -107,9 +107,10 @@ app.get('/api/plans', isLoggedIn, (req, res) => {
 
 app.post('/api/plans/addPlan', isLoggedIn, async (req, res) => {
     try {
-        await Promise.all(req.body.map(course => planDAO.addCourseToPlan(req.user.id, course.codice))); //array of proms that execute the query for the single course
+        await Promise.all(req.body.plan.map(course => planDAO.addCourseToPlan(req.user.id, course.codice))); //array of proms that execute the query for the single course
+        await userDAO.updateType(req.body.available, req.user.id);
         await courseDAO.updateStudentsCount();
-        res.status(200).json(req.body);
+        res.status(200).json({type: req.body.available, plan: req.body.plan});
     } catch (error) {
         res.status(200).json(({ errMessage: "Some courses are already inserted", errType: error }));
         return;
@@ -118,7 +119,7 @@ app.post('/api/plans/addPlan', isLoggedIn, async (req, res) => {
 
 app.delete('/api/plans/deletePlan', isLoggedIn, (req, res) => {
     // TODO: if req.user.available => validation
-    planDAO.deletePlan(req.user.id).then(() => courseDAO.updateStudentsCount())
+    planDAO.deletePlan(req.user.id).then(() => courseDAO.updateStudentsCount()).then(() => userDAO.updateType(null, req.user.id))
         .then(() => res.status(200).json({ message: "Delete success" }))
         .catch(err => ({ errMessage: `Delete went wrong for the user ${req.user.id}`, errType: err }));
 });
@@ -126,7 +127,8 @@ app.delete('/api/plans/deletePlan', isLoggedIn, (req, res) => {
 app.put('/api/plans/updatePlan', isLoggedIn, async (req, res) => {
     try {
         await planDAO.deletePlan(req.user.id);
-        await Promise.all(req.body.map(course => planDAO.addCourseToPlan(req.user.id, course.codice)));
+        await Promise.all(req.body.plan.map(course => planDAO.addCourseToPlan(req.user.id, course.codice)));
+        await userDAO.updateType(req.body.available, req.user.id);
         await courseDAO.updateStudentsCount();
         res.status(200).json(req.body);
     } catch (error) {

@@ -48,3 +48,16 @@ exports.getUser = (email, password) => {
             });
     });
 }
+
+exports.updateType = (type, userId) => {
+    return new Promise((resolve, reject) => {
+        db.run('UPDATE users SET available = ? WHERE id = ?',
+        [type, userId], (err) => {
+            if(err) {
+                reject(err);
+            } else {
+                resolve(null);
+            }
+        });
+    });
+}
