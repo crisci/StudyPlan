@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Button, Container, ListGroup } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
@@ -7,9 +6,9 @@ function UserView(props) {
     return (
         <Container fluid>
             <h2>Welcome, {props.user?.nome}</h2>
-            {!(props.user.available === null)
-                ? <StudyPlanAvailable type={props.user.available} crediti={props.crediti} edit={props.edit} setEdit={props.setEdit} plan={props.plan} />
-                : <StudyPlanNotAvailable  setAdd={props.setAdd} add={props.add} />}
+            {(props.plan?.length)
+                ? <StudyPlanAvailable type={props.user.available} crediti={props.crediti} edit={props.edit} setEdit={props.setEdit} plan={props.plan} deletePlan={props.deletePlan}/>
+                : <StudyPlanNotAvailable setAdd={props.setAdd} add={props.add} />}
         </Container>
     )
 }
@@ -24,30 +23,38 @@ function StudyPlanAvailable(props) {
         navigate('/editPlan');
     }
 
+    const handleDelete = () => {
+        props.deletePlan();
+        navigate('/');
+    }
+
     return (
         <>
             {
-                !props.edit 
+                !props.edit
                     ? <Container>
-                    <p style={{ fontWeight: "600", fontSize: "1.8rem", margin: "0" }}> Your current plan </p>
-                    <p style={{ fontWeight: "400", fontSize: "1.2rem", margin: "0" }}> Type: {props.type ? "Full Time" : "Part Time"}</p>
-                    <p style={{ fontWeight: "400", fontSize: "1.2rem", margin: "0" }}> Totale CFU: {props.crediti}</p>
-                    <ListGroup variant="flush" className="px-3">
-                        <ListGroup.Item key="title" as='li' className="d-flex justify-content-beetween list-titles">
-                            <Container>Codice</Container>
-                            <Container>Corso</Container>
-                            <Container>CFU</Container>
-                        </ListGroup.Item>
-                        {props.plan
-                            ?.map(p => <ListGroup.Item key={p.codice} as='li' className="d-flex justify-content-beetween mb-3">
-                                <Container>{p.codice}</Container>
-                                <Container>{p.titolo}</Container>
-                                <Container>{p.crediti}</Container>
-                            </ListGroup.Item>)}
-                    </ListGroup>
-                    <Button variant="primary" style={{ width: "10rem", borderRadius: "2rem" }} onClick={handleEdit}>Edit</Button>
-                </Container>
-                : false
+                        <p style={{ fontWeight: "600", fontSize: "1.8rem", margin: "0" }}> Your current plan </p>
+                        <p style={{ fontWeight: "400", fontSize: "1.2rem", margin: "0" }}> Type: {props.type ? "Full Time" : "Part Time"}</p>
+                        <p style={{ fontWeight: "400", fontSize: "1.2rem", margin: "0" }}> Totale CFU: {props.crediti}</p>
+                        <ListGroup variant="flush" className="px-3">
+                            <ListGroup.Item key="title" as='li' className="d-flex justify-content-beetween list-titles">
+                                <Container>Codice</Container>
+                                <Container>Corso</Container>
+                                <Container>CFU</Container>
+                            </ListGroup.Item>
+                            {props.plan
+                                ?.map(p => <ListGroup.Item key={p.codice} as='li' className="d-flex justify-content-beetween mb-3">
+                                    <Container>{p.codice}</Container>
+                                    <Container>{p.titolo}</Container>
+                                    <Container>{p.crediti}</Container>
+                                </ListGroup.Item>)}
+                        </ListGroup>
+                        <Container>
+                            <Button variant="primary" style={{ width: "10rem", borderRadius: "2rem" }} onClick={handleEdit}>Edit</Button>
+                            <Button variant="danger" style={{ width: "10rem", borderRadius: "2rem" }} onClick={handleDelete}>Delete</Button>
+                        </Container>
+                    </Container>
+                    : false
             }
         </>
 

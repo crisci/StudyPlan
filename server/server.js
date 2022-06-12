@@ -106,13 +106,15 @@ app.get('/api/plans', isLoggedIn, (req, res) => {
 })
 
 app.post('/api/plans/addPlan', isLoggedIn, async (req, res) => {
+
+    //TODO: validation and if errors then return status code 422 (Unprocessable entity)
     try {
         await Promise.all(req.body.plan.map(course => planDAO.addCourseToPlan(req.user.id, course.codice))); //array of proms that execute the query for the single course
         await userDAO.updateType(req.body.available, req.user.id);
         await courseDAO.updateStudentsCount();
         res.status(200).json({type: req.body.available, plan: req.body.plan});
     } catch (error) {
-        res.status(200).json(({ errMessage: "Some courses are already inserted", errType: error }));
+        res.status(503).json({errMessage: `Database error during the creation of plan for user ${req.user.id}.`});
         return;
     }
 });
@@ -121,7 +123,7 @@ app.delete('/api/plans/deletePlan', isLoggedIn, (req, res) => {
     // TODO: if req.user.available => validation
     planDAO.deletePlan(req.user.id).then(() => courseDAO.updateStudentsCount()).then(() => userDAO.updateType(null, req.user.id))
         .then(() => res.status(200).json({ message: "Delete success" }))
-        .catch(err => ({ errMessage: `Delete went wrong for the user ${req.user.id}`, errType: err }));
+        .catch(err => res.status(503).send({ errMessage: `Delete went wrong for the user ${req.user.id}`}));
 });
 
 app.put('/api/plans/updatePlan', isLoggedIn, async (req, res) => {
@@ -132,7 +134,7 @@ app.put('/api/plans/updatePlan', isLoggedIn, async (req, res) => {
         await courseDAO.updateStudentsCount();
         res.status(200).json(req.body);
     } catch (error) {
-        res.status(200).json({ errMessage: `Plan update failed for user ${req.user.id}`, errType: error })
+        res.status(503).json({ errMessage: `Plan update failed for user ${req.user.id}`})
     }
 
 });

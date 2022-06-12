@@ -13,12 +13,70 @@ function getAllCourses() {
 
 function getPlan() {
   return new Promise((resolve, reject) => {
-    fetch(`${APIURL}/plans`, {credentials: 'include'})
+    fetch(`${APIURL}/plans`, { credentials: 'include' })
       .then(res => {
-        if(res.ok) {
+        if (res.ok) {
           resolve(res.json());
         }
       })
+  });
+}
+
+function addPlan(plan, type) {
+  return new Promise((resolve, reject) => {
+    fetch(`${APIURL}/plans/addPlan`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ available: type, plan: plan })
+      }).then(response => {
+        if (response.ok) {
+          resolve(null);
+        } else {
+          response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
+        }
+      }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
+  });
+}
+
+function updateCurrentPlan(plan, type) {
+  return new Promise((resolve, reject) => {
+    fetch(`${APIURL}/plans/updatePlan`, 
+    {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ available: type, plan: plan })
+    }).then(response => {
+      if (response.ok) {
+        resolve(null);
+      } else {
+        response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
+      }
+    }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
+  });
+}
+
+
+function deletePlan() {
+  return new Promise((resolve, reject) => {
+    fetch(`${APIURL}/plans/deletePlan`,
+    {
+      method:'DELETE',
+      credentials: 'include'
+    }
+    ).then(response => {
+      if(response.ok) {
+        resolve(null);
+      } else {
+        response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
+      }
+    }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
   });
 }
 
@@ -64,5 +122,5 @@ function getUserInfo() {
 
 }
 
-const API = { getAllCourses, logIn, logOut, getUserInfo, getPlan };
+const API = { getAllCourses, logIn, logOut, getUserInfo, getPlan, addPlan, deletePlan, updateCurrentPlan };
 export default API;
