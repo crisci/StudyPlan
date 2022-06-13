@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Form, Button, Row, Col, Container, ListGroup, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
 import { BsXCircleFill } from "react-icons/bs";
 
 function PlanForm(props) {
@@ -9,17 +8,25 @@ function PlanForm(props) {
 
     const [currentCourse, setCurrentCourse] = useState(''); //form's value
     const [planType, setPlanType] = useState(props.type); //1 full time, 0 part time
+    const [boundCrediti, setBoundCrediti] = useState(planType ? {max: 80, min: 40} : {max: 40, min: 20});
     const [error, setError] = useState("");
-    const navigate = useNavigate();
+    
 
 
 
     const handleAdd = (event) => {
         event.preventDefault();
-            const current = props.courses.find(course => course.codice === currentCourse);
+        const current = props.courses.find(course => course.codice === currentCourse);
+        if(props.currentCrediti + current.crediti > boundCrediti.max) {
+            setError(`Il corso "${current.titolo}" non può essere aggiunto perchè produrrebbe un numero troppo elevato di crediti per il piano di studio selezionato.`)
+        } else if(current.max_studenti === current.tot_studenti) {
+            setError(`Il corso "${current.titolo}" non può essere aggiunto perchè ha raggiunto la soglia massima di studenti.`)
+        }
+        else {
             props.addCourseToPlan(current);
             setCurrentCourse('');
-        
+        }
+
     }
 
     const handleCancel = () => {
@@ -30,7 +37,6 @@ function PlanForm(props) {
             props.setEdit(false);
         }
         setPlanType();
-        navigate('/');
     }
 
     const handleSave = () => {
@@ -46,20 +52,22 @@ function PlanForm(props) {
         switch (value) {
             case 0:
                 if (props.currentCrediti > 40) {
-                    setError("Numero di CFU troppo elevato per selezionare part time.");
+                    setError("Numero di CFU troppo elevato per selezionare l'opzione: Part Time.");
                 } else {
+                    setBoundCrediti({max: 40, min: 20})
                     setPlanType(value);
                 }
                 break;
 
             default:
+                setBoundCrediti({max: 80, min: 40})
                 setPlanType(value);
                 break;
         }
     }
 
     function handleX(course) {
-        if(props.currentPlan.map(p => p.propedeuticita).find(propedeuticita => propedeuticita === course.codice)) {
+        if (props.currentPlan.map(p => p.propedeuticita).find(propedeuticita => propedeuticita === course.codice)) {
             setError('Non puoi eliminare il corso poichè propedeutico.')
         } else {
             props.deleteCourseFromPlan(course.codice, course.crediti);
@@ -67,20 +75,8 @@ function PlanForm(props) {
     }
 
     function disableSave() {
-        switch (planType) {
-            case 1:
-                if (props.currentCrediti < 40 || props.currentCrediti > 80) {
-                    return true;
-                }
-                break;
-            case 0:
-                if (props.currentCrediti < 20 || props.currentCrediti > 40) {
-                    return true;
-                }
-                break;
-
-            default:
-                return true;
+        if(props.currentCrediti < boundCrediti.min || props.currentCrediti > boundCrediti.max) {
+            return true;
         }
         return false;
     }
@@ -94,7 +90,7 @@ function PlanForm(props) {
                     <Button className="m-auto text-center rounded-pill me-2" onClick={() => handleSwitchType(1)}>Full Time</Button>
                     <Button className="m-auto text-center rounded-pill ms-2" onClick={() => handleSwitchType(0)}>Part Time</Button>
                 </Container>
-                <p>{planType !== null ?  planType ? "Type select: Full Time" : "Type select: Part Time" : "Seleziona il piano di studi per continuare"}</p>
+                <p>{planType !== null ? planType ? "Type select: Full Time" : "Type select: Part Time" : "Seleziona il piano di studi per continuare"}</p>
             </Row>
             <Form onSubmit={handleAdd} className="d-flex m-auto mb-3">
                 <Row className="justify-content-center w-100">
@@ -105,14 +101,13 @@ function PlanForm(props) {
                                 {
                                     // Filter the entire list in order to select only the available courses based on currentPlan
                                     props.courses
-                                        .filter(course => !props.currentPlan.find(p => p.codice === course.codice)) //filter film already added
+                                        .filter(course => !props.currentPlan?.find(p => p.codice === course.codice)) //filter film already added
                                         .filter(course => course.propedeuticita
-                                            ? course.propedeuticita.split().some(codice => props.currentPlan.map(p => p.codice).includes(codice)) //true because at the beginning the currentPlan in empty
+                                            ? course.propedeuticita.split().some(codice => props.currentPlan?.map(p => p.codice).includes(codice)) //true because at the beginning the currentPlan in empty
                                             : true)                                                                                             //when the courses will be added it returns false
                                         .filter(course => course.incompatibilita
-                                            ? !course.incompatibilita.split("\n").some(codice => props.currentPlan.map(p => p.codice).includes(codice)) //return true if it found some incompatibility so !true
+                                            ? !course.incompatibilita.split("\n").some(codice => props.currentPlan?.map(p => p.codice).includes(codice)) //return true if it found some incompatibility so !true
                                             : true)
-                                        .filter(course => course.max_studenti ? course.tot_studenti < course.max_studenti : true)
                                         .map(course => <option key={course.codice} value={course.codice}>{course.titolo}</option>)
                                 }
                             </Form.Control>
@@ -128,7 +123,7 @@ function PlanForm(props) {
                 <p>CFU: {props.currentCrediti}</p>
                 <p>
                     {planType !== null
-                        ? planType ? "Min CFU: 40 - Max CFU: 80" : "Min CFU: 20 - Max CFU: 40"
+                        ? `Min CFU: ${boundCrediti.min} - Max CFU: ${boundCrediti.max}`
                         : false}
                 </p>
             </Row>

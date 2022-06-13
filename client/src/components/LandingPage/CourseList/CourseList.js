@@ -22,7 +22,7 @@ function CourseList(props) {
                                 <Container>Max Studenti</Container>
                                 <Container>Incompatibilità/Propedeuticità</Container>
                             </ListGroup.Item>
-                            {props.courses.map(course => <CourseItem key={course.codice} course={course} currentPlan={props.currentPlan} add={props.add} edit={props.edit}/>)} {/* Key should be specified inside the array. */}
+                            {props.courses.map(course => <CourseItem key={course.codice} course={course} currentPlan={props.currentPlan} add={props.add} edit={props.edit} />)} {/* Key should be specified inside the array. */}
                         </ListGroup>
                     </Container>
             }
@@ -33,56 +33,43 @@ function CourseList(props) {
 function CourseItem(props) {
 
     const [description, setDescription] = useState(false);
-    const [incompatibile, setIncompatibile] = useState(false);
-    const [propedetico, setPropedeutico] = useState(false);
+    const [warningMessage, setWarningMessage] = useState('');
     const [selected, setSelected] = useState(false);
 
     useEffect(() => {
         if (props.add || props.edit) { //if there isnt a currentPlan => no need to show the colors (add or edit)
-            if (props.currentPlan?.map(p => p.codice).find(cod => cod === props.course.codice)) { //return truthy if the code is found in the currentPlan list
-                setSelected(true);
+                if (props.currentPlan?.map(p => p.codice).find(cod => cod === props.course.codice)) { //return truthy if the code is found in the currentPlan list
+                    setSelected(true);
+                    setWarningMessage("");
+                } else {
+                    setSelected(false);
+                    if (props.course.incompatibilita) {
+                        if (props.course  //return true if an incompatibility is found
+                            .incompatibilita?.split('\n')
+                            .some(i => props.currentPlan?.map(p => p.codice).find(currentPlanC => currentPlanC === i))) {
+    
+                            setWarningMessage( `Incompatibile con il corso ${props.course.incompatibilita?.split('\n')
+                            .find(ci => props.currentPlan?.map(p => p.codice).some(pi => pi === ci))}.` );
+                        }
+                        if (props.course.propedeuticita) {
+                            if (!props.course
+                                .propedeuticita?.split("\n")
+                                .some(propedeuticita => props.currentPlan?.map(p => p.codice)
+                                    .find(currentPlanC => currentPlanC === propedeuticita))) { //return truthy if the propedeuticita isnt in the currentPlan list
+                                setWarningMessage(`Il corso ${props.course.propedeuticita} non è stato ancora aggiunto alla lista.`);
+                            }
+                        }
+                    }
+                }
             } else {
+                setWarningMessage("");
                 setSelected(false);
-                if (props.course.incompatibilita) {
-                    if (props.course  //return true if an incompatibility is found
-                        .incompatibilita?.split('\n')
-                        .some(i => props.currentPlan?.map(p => p.codice).find(currentPlanC => currentPlanC === i))) {
-                        setIncompatibile(true);
-                    } else {
-                        setIncompatibile(false);
-                    }
-                }
-                if (props.course.propedeuticita) {
-                    if (!props.course
-                        .propedeuticita?.split("\n")
-                        .some(propedeuticita => props.currentPlan?.map(p => p.codice) 
-                        .find(currentPlanC => currentPlanC === propedeuticita))) { //return truthy if the propedeuticita isnt in the currentPlan list
-                            setPropedeutico(true);
-                    } else {
-                        setPropedeutico(false);
-                    }
-                }
             }
-        } else {
-            setIncompatibile(false);
-            setPropedeutico(false);
-            setSelected(false);
-        }
-    }, [props.course.codice, props.course.incompatibilita, props.course.propedeuticita, props.currentPlan.length, props.add, props.edit])
-
-
+        }, [props.course.codice, props.course.incompatibilita, props.course.propedeuticita, props.currentPlan, props.add, props.edit])
+    
 
     const handleClick = () => {
         setDescription(!description);
-    }
-
-    function showInformation() {
-        if (propedetico) {
-            return `${props.course.propedeuticita} non è stato ancora aggiunto alla lista`
-        }
-        if (incompatibile) {
-            return `Incompatibile con ${props.course.incompatibilita?.split('\n').find(ci => props.currentPlan?.map(p => p.codice).some(pi => pi === ci))}`
-        }
     }
 
     return (
@@ -91,7 +78,7 @@ function CourseItem(props) {
                 {
                     backgroundColor:
                         !selected
-                            ? (incompatibile || propedetico)
+                            ? warningMessage
                                 ? '#ffcdd2'
                                 : false
                             : '#c8e6c9'
@@ -100,8 +87,8 @@ function CourseItem(props) {
             <Container>{props.course.codice}</Container>
             <Container>
                 {props.course.titolo}
-                {(incompatibile || propedetico)
-                    ? <OverlayButton showInformation={showInformation} /> : false
+                {warningMessage
+                    ? <OverlayButton showInformation={warningMessage} /> : false
                 }
             </Container>
             <Container>{props.course.crediti}</Container>
@@ -131,7 +118,7 @@ function OverlayButton(props) {
             placement='right'
             overlay={
                 <Tooltip id={`tooltip-right`}>
-                    {props.showInformation()}
+                    {props.showInformation}
                 </Tooltip>
             }>
             <Button variant='danger' className="btn btn-sm ms-2" ><BsExclamationCircleFill /></Button>

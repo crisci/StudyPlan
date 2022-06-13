@@ -54,36 +54,29 @@ function MainApp() {
         plan => {
           if (plan.length) {
             setPlan(plan); //if there is a plan saved it could be also empty => []
+            setCurrentPlan(plan);
             setCrediti(plan ? plan.map(p => p.crediti).reduce(((accumulator, value) => accumulator + value), 0) : 0);
+            setCurrentCrediti(plan ? plan.map(p => p.crediti).reduce(((accumulator, value) => accumulator + value), 0) : 0);
             setCurrentType(user.available);
             setDirty(false);
           } else {
             setPlan(); // = undefinded
+            setCurrentPlan([]);
+            setCurrentCrediti(0);
             setCrediti(0);
             setCurrentType(null);
             setDirty(false);
           }
-        } 
+        }
       )
-    }    
-    
-  }, [loggedIn, user.available, dirty]);
-
-  //if edit or add
-  //ogni volta che devo aggiungere o modifico passo tutto a current plan
-  //che contiene una copia dei dati persistenti sul db
-  useEffect(() => {
-    if (add || edit) {
-      setCurrentPlan(plan ? plan : []);
-      setCurrentCrediti(crediti);
     }
-  }, [plan, crediti, setCurrentPlan, add, edit])
+
+  }, [loggedIn, user.available, dirty]);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
         // here you have the user info, if already logged in
-        // TODO: store them somewhere and use them, if needed
         const user = await API.getUserInfo();
         setLoggedIn(true);
         setUser(user);
@@ -133,36 +126,31 @@ function MainApp() {
   }
 
   const cancelCurrentPlan = () => {
-    setCurrentPlan([]);
-    setCurrentCrediti(0);
-    // navigate('/'); // TODO: Remember to delete the function handleCancel in PlanForm
+    setCurrentPlan(plan ? plan : []);
+    setCurrentCrediti(crediti);
+    navigate('/'); 
   }
+
 
   const saveCurrentPlan = async (type) => {
     try {
-      if(add) {
+      if (add) {
         await API.addPlan(currentPlan, type);
       } else {
         await API.updateCurrentPlan(currentPlan, type);
       }
-      setUser({...user, available: type});
+      setUser({ ...user, available: type });
       setDirty(true);
       navigate('/');
     } catch (error) {
-      
+      console.error(error);
+
     }
-    // API.addPlan(currentPlan, type).then(() => {
-    //   cancelCurrentPlan();
-    //   setUser({ ...user, available: type });
-    //   setDirty(true);
-    //   navigate('/');
-    // }).catch(err => console.error(err.errMessage));
   }
 
 
   const deletePlan = () => {
     API.deletePlan().then(() => {
-      cancelCurrentPlan();
       setUser({ ...user, available: null });
       setDirty(true);
     })
@@ -170,7 +158,7 @@ function MainApp() {
 
   return (
     <Routes>
-      <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} deletePlan={deletePlan} coursesLoading={coursesLoading}/>} >
+      <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} deletePlan={deletePlan} coursesLoading={coursesLoading} />} >
         <Route path="editPlan" element={!loggedIn
           ? <Navigate to='/login' />
           : <PlanForm type={user.available} currentPlan={currentPlan} courses={courses} currentType={currentType}
