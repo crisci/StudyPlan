@@ -117,11 +117,13 @@ function MainApp() {
 
   const addCourseToPlan = (course) => {
     setCurrentPlan(oldPlan => [...oldPlan, course]);
+    setCourses(oldCourses => oldCourses.map(c => course.codice === c.codice ? {...course, tot_studenti: course.tot_studenti + 1} : c));
     setCurrentCrediti(oldCrediti => oldCrediti + course.crediti);
   }
 
   const deleteCourseFromPlan = (codice, crediti) => {
     setCurrentPlan(currentPlan.filter(p => p.codice !== codice));
+    setCourses(oldCourses => oldCourses.map(course => course.codice === codice ? {...course, tot_studenti: course.tot_studenti - 1} : course));
     setCurrentCrediti(oldCrediti => oldCrediti - crediti);
   }
 
