@@ -13,7 +13,7 @@ function Nav(props) {
                 <Navbar.Brand >
                     <FaUserGraduate className="mb-1" size='20px' />{' '}myPlan
                 </Navbar.Brand>
-                <BsPersonCircle style={{ cursor: "pointer" }} color='white' size='30px' onClick={() => { props.user?.id ? navigate(`/userPage`) : navigate('/login') }} />
+                <BsPersonCircle style={{ cursor: "pointer" }} color='white' size='30px' onClick={() => { props.user?.id ? props.navigateToUserPage() : navigate('/login') }} />
             </Container>
         </Navbar >
     );

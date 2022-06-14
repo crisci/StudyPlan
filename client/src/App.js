@@ -8,24 +8,12 @@ import LandingPage from './components/LandingPage/LandingPage';
 import { useEffect, useState } from 'react';
 import API from './API';
 import PlanForm from './components/LandingPage/PlanForm/PlanForm';
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
   return (
     <>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={2500}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover={false}
-      />
       <Router>
         <MainApp />
       </Router>
@@ -112,18 +100,6 @@ function MainApp() {
       })
   }
 
-  const notifyError = (errMessage) => {
-    toast.error(errMessage, {
-      position: "bottom-right",
-      autoClose: 2500,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: false,
-      draggable: true,
-      progress: undefined,
-    });
-  }
-
   const doLogOut = async () => {
     await API.logOut();
     setLoggedIn(false);
@@ -157,6 +133,13 @@ function MainApp() {
     navigate('/');
   }
 
+  const navigateToUserPage = () => {
+    setCurrentPlan(plan ? plan : []);
+    setCurrentCrediti(crediti);
+    setAdd(false);
+    setEdit(false);
+    navigate('/userPage');
+  }
 
   const saveCurrentPlan = async (type) => {
     try {
@@ -171,21 +154,7 @@ function MainApp() {
       setDirty(true);
       navigate('/');
     } catch (error) {
-      console.error(error);
-      toast('🦄 Wow so easy!', {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-      });
-      //TODO: handle error on validation. Generic error like:
-      // * Something went wrong. Maybe the plan is not valid.
-      // * Do not navigate to ('/') and not setDirty
-      // * It remains on the same page and there will be a notification 
-      // * that something went wrong.
+      console.error(error.errMessage);
     }
   }
 
@@ -200,7 +169,7 @@ function MainApp() {
   return (
 
     <Routes>
-      <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} deletePlan={deletePlan} coursesLoading={coursesLoading} />} >
+      <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} deletePlan={deletePlan} coursesLoading={coursesLoading} navigateToUserPage={navigateToUserPage}/>} >
         <Route path="editPlan" element={!loggedIn
           ? <Navigate to='/login' />
           : <PlanForm type={user.available} currentPlan={currentPlan} courses={courses} currentType={currentType}

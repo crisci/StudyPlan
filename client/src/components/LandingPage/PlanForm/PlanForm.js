@@ -111,7 +111,7 @@ function PlanForm(props) {
                         </Form.Group>
                     </Col>
                     <Col className="col-md-1">
-                        <Button className="m-auto w-75 text-center rounded-pill" type='submit' onClick={handleAdd} > Add </Button>
+                        <Button className="m-auto w-75 text-center rounded-pill" type='submit' onClick={handleAdd} disabled={currentCourse ? false : true }> Add </Button>
                     </Col>
                 </Row>
             </Form>

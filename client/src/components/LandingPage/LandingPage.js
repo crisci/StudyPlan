@@ -15,7 +15,7 @@ function LandingPage(props) {
 
     return (
         <>
-            <Nav user={props.user} />
+            <Nav user={props.user} navigateToUserPage={props.navigateToUserPage}/>
             <Container fluid style={{ paddingTop: "4rem" }} className="text-center">
                 {/* Se presente l'utente (una volta loggato) mostra la sua schermata con eventualmente un piano di studi
                     altrimenti non sarà loggato e non deve mostrare nulla. */}
