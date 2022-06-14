@@ -13,6 +13,15 @@ exports.getAllCourses = () => {
     });
 }
 
+exports.getAllCoursesCode = () => {
+    return new Promise((resolve, reject) => {
+        db.all(`SELECT codice FROM courses`, (err, rows) => {
+            if (err) reject(err);
+            resolve(rows.map(c => c.codice));
+        })
+    });
+}
+
 exports.updateStudentsCount = () => {
     return new Promise((resolve, reject) => {
         db.run('UPDATE courses SET tot_studenti = (SELECT COUNT(*) FROM plans WHERE plans.courseId = courses.codice)',

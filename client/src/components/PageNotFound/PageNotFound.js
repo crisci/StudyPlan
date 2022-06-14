@@ -16,7 +16,7 @@ function PageNotFound() {
                 <Button className='btn-primary nf-button' onClick={() => {navigate('/')}}>Go Home</Button>
             </Col>
             <Col md={5} className="m-auto">
-                <img src={image} alt="Image" />
+                <img src={image} alt="" />
             </Col>
         </Row>
     )

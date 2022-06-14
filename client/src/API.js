@@ -44,21 +44,21 @@ function addPlan(plan, type) {
 
 function updateCurrentPlan(plan, type) {
   return new Promise((resolve, reject) => {
-    fetch(`${APIURL}/plans/updatePlan`, 
-    {
-      method: 'PUT',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ available: type, plan: plan })
-    }).then(response => {
-      if (response.ok) {
-        resolve(null);
-      } else {
-        response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
-      }
-    }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
+    fetch(`${APIURL}/plans/updatePlan`,
+      {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ available: type, plan: plan })
+      }).then(response => {
+        if (response.ok) {
+          resolve(null);
+        } else {
+          response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
+        }
+      }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
   });
 }
 
@@ -66,12 +66,12 @@ function updateCurrentPlan(plan, type) {
 function deletePlan() {
   return new Promise((resolve, reject) => {
     fetch(`${APIURL}/plans/deletePlan`,
-    {
-      method:'DELETE',
-      credentials: 'include'
-    }
+      {
+        method: 'DELETE',
+        credentials: 'include'
+      }
     ).then(response => {
-      if(response.ok) {
+      if (response.ok) {
         resolve(null);
       } else {
         response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
@@ -107,19 +107,17 @@ async function logOut() {
 
 function getUserInfo() {
   return new Promise((resolve, reject) => {
-    fetch(`${APIURL}/sessions/current`,
-      {
-        credentials: 'include'
-      }
-    ).then(res => {
-      if (res.ok) {
-        resolve(res.json());
-      } else {
-        reject(res.json());
-      }
-    })
+    fetch(`${APIURL}/sessions/current`, { credentials: 'include' }).then(res => {
+      res.json()
+        .then(resJSON => {
+          if (res.ok) {
+            resolve(resJSON);
+          } else {
+            reject(resJSON);
+          }
+        }).catch(() => reject("Unable to parse user datas."));
+    });
   });
-
 }
 
 const API = { getAllCourses, logIn, logOut, getUserInfo, getPlan, addPlan, deletePlan, updateCurrentPlan };

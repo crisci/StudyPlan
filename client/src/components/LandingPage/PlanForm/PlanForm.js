@@ -4,16 +4,12 @@ import { BsXCircleFill } from "react-icons/bs";
 
 function PlanForm(props) {
 
-
-
     const [currentCourse, setCurrentCourse] = useState(''); //form's value
     const [planType, setPlanType] = useState(props.type); //1 full time, 0 part time
     const [boundCrediti, setBoundCrediti] = useState(planType ? {max: 80, min: 40} : {max: 40, min: 20});
     const [error, setError] = useState("");
     
-
-
-
+    
     const handleAdd = (event) => {
         event.preventDefault();
         const current = props.courses.find(course => course.codice === currentCourse);
@@ -60,7 +56,7 @@ function PlanForm(props) {
                 break;
 
             default:
-                setBoundCrediti({max: 80, min: 40})
+                setBoundCrediti({max: 80, min: 60})
                 setPlanType(value);
                 break;
         }
@@ -68,6 +64,7 @@ function PlanForm(props) {
 
     function handleX(course) {
         if (props.currentPlan.map(p => p.propedeuticita).find(propedeuticita => propedeuticita === course.codice)) {
+            //TODO: find who has propedeuticita
             setError('Non puoi eliminare il corso poichè propedeutico.')
         } else {
             props.deleteCourseFromPlan(course.codice, course.crediti);

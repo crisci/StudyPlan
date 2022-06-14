@@ -81,7 +81,7 @@ function MainApp() {
         setLoggedIn(true);
         setUser(user);
       } catch (err) {
-        console.error(err.error);
+        console.error(err.errMessage);
       }
     };
 
@@ -129,6 +129,7 @@ function MainApp() {
 
   const cancelCurrentPlan = () => {
     setCurrentPlan(plan ? plan : []);
+    setDirty(true); //in the meantime something could change (n-clients problems).
     setCurrentCrediti(crediti);
     navigate('/'); 
   }
@@ -138,15 +139,21 @@ function MainApp() {
     try {
       if (add) {
         await API.addPlan(currentPlan, type);
+        setAdd(false);
       } else {
         await API.updateCurrentPlan(currentPlan, type);
+        setEdit(false);
       }
       setUser({ ...user, available: type });
       setDirty(true);
       navigate('/');
     } catch (error) {
-      console.error(error);
-
+        console.error(error);
+        //TODO: handle error on validation. Generic error like:
+        // * Something went wrong. Maybe the plan is not valid.
+        // * Do not navigate to ('/') and not setDirty
+        // * It remains on the same page and there will be a notification 
+        // * that something went wrong.
     }
   }
 

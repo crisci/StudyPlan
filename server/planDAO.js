@@ -7,7 +7,7 @@ db.run(`PRAGMA foreign_key = ON`);
 //get plan related to the user
 exports.getPlanByUser = (userId) => {
     return new Promise((resolve, reject) => {
-        db.all('SELECT courseId, titolo, crediti FROM users LEFT JOIN plans ON users.id = plans.userId LEFT JOIN courses ON plans.courseId = courses.codice WHERE id = ?',
+        db.all('SELECT courseId, titolo, crediti FROM users LEFT JOIN plans ON users.id = plans.userId LEFT JOIN courses ON plans.courseId = courses.codice WHERE id = ? ORDER BY titolo ASC',
             [userId], (err, rows) => {
                 if (err) {
                     reject(err);

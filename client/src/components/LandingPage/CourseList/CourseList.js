@@ -43,6 +43,11 @@ function CourseItem(props) {
                     setWarningMessage("");
                 } else {
                     setSelected(false);
+                    if(props.course.max_studenti) {
+                        if(props.course.tot_studenti >= props.course.max_studenti) {
+                            setWarningMessage(`Numero di studenti massimo raggiunto.`)
+                        }
+                    }
                     if (props.course.incompatibilita) {
                         if (props.course  //return true if an incompatibility is found
                             .incompatibilita?.split('\n')
@@ -69,7 +74,8 @@ function CourseItem(props) {
                 setWarningMessage("");
                 setSelected(false);
             }
-        }, [props.course.codice, props.course.incompatibilita, props.course.propedeuticita, props.currentPlan, props.add, props.edit])
+            //TODO: chiedi se va bene
+        }, [props.course, props.currentPlan, props.add, props.edit])
     
 
     const handleClick = () => {
