@@ -50,16 +50,20 @@ function CourseItem(props) {
     
                             setWarningMessage( `Incompatibile con il corso ${props.course.incompatibilita?.split('\n')
                             .find(ci => props.currentPlan?.map(p => p.codice).some(pi => pi === ci))}.` );
-                        }
-                        if (props.course.propedeuticita) {
-                            if (!props.course
-                                .propedeuticita?.split("\n")
-                                .some(propedeuticita => props.currentPlan?.map(p => p.codice)
-                                    .find(currentPlanC => currentPlanC === propedeuticita))) { //return truthy if the propedeuticita isnt in the currentPlan list
-                                setWarningMessage(`Il corso ${props.course.propedeuticita} non è stato ancora aggiunto alla lista.`);
-                            }
+                        } else {
+                            setWarningMessage("");
                         }
                     }
+                    if (props.course.propedeuticita) {
+                        if (!props.course
+                            .propedeuticita?.split("\n")
+                            .some(propedeuticita => props.currentPlan?.map(p => p.codice)
+                                .find(currentPlanC => currentPlanC === propedeuticita))) { //return truthy if the propedeuticita isnt in the currentPlan list
+                                    setWarningMessage(`Il corso ${props.course.propedeuticita} non è stato ancora aggiunto alla lista.`);
+                        } else {
+                            setWarningMessage("");
+                        }
+                }
                 }
             } else {
                 setWarningMessage("");
