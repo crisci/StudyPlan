@@ -10,10 +10,12 @@ exports.getUserById = (id) => {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM users WHERE id = ?';
         db.get(sql, [id], (err, row) => {
-            if (err)
+            if (err) {
                 reject(err);
-            else if (row === undefined)
+            }
+            else if (row === undefined) {
                 resolve({ error: 'User not found.' });
+            }
             else {
                 const user = { id: row.id, username: row.email, nome: row.nome, cognome: row.cognome, available: row.available }
                 resolve(user);
@@ -29,7 +31,7 @@ exports.getUser = (email, password) => {
                 if (err) {
                     reject(err);
                 } else if (row === undefined) {
-                    resolve({error: 'User not found.'}); //Resolve: because from DB side everything goes well. 
+                    resolve(false); //Resolve: because from DB side everything goes well. 
                 } else {
                     const user = { id: row.id, username: row.email, nome: row.nome, cognome: row.cognome, available: row.available };
                     const salt = row.salt;
@@ -52,12 +54,12 @@ exports.getUser = (email, password) => {
 exports.updateType = (type, userId) => {
     return new Promise((resolve, reject) => {
         db.run('UPDATE users SET available = ? WHERE id = ?',
-        [type, userId], (err) => {
-            if(err) {
-                reject(err);
-            } else {
-                resolve(null);
-            }
-        });
+            [type, userId], (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(null);
+                }
+            });
     });
 }

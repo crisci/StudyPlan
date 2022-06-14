@@ -14,18 +14,17 @@ const planDAO = require('./planDAO');
 const app = express();
 const port = 3001;
 
+
 //passport setup
 passport.use(new LocalStrategy(
     function (username, password, done) {
         userDAO.getUser(username, password).then((user) => {
             if (!user)
                 return done(null, false, { message: 'Incorrect username and/or password.' });
-
             return done(null, user);
         })
     }
 ));
-
 
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -42,6 +41,7 @@ passport.deserializeUser((id, done) => {
 });
 
 
+
 //middleware
 const corsOptions = {
     origin: 'http://localhost:3000',
@@ -52,7 +52,7 @@ const isLoggedIn = (req, res, next) => {
     if (req.isAuthenticated())
         return next();
 
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ error: 'not authenticated' });
 }
 
 app.use(cors(corsOptions));
@@ -133,8 +133,7 @@ app.get('/api/courses', (req, res) => {
 
 //user API
 app.post('/api/sessions', [
-    body('username')
-        .isEmail().withMessage('Email not valid')
+    body('username').isEmail().withMessage('Email not valid'),
 ], function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -158,20 +157,19 @@ app.get('/api/sessions/current', (req, res) => {
     if (req.isAuthenticated()) {
         res.status(200).json(req.user);
     } else {
-        res.status(401).json({ errMessage: "Unauthenticated user!" })
+        res.status(401).json({ error: "Unauthenticated user!" })
     }
 }
 );
 
 //plan API
 app.get('/api/plans', isLoggedIn, (req, res) => {
-    // TODO: if req.user.available => validation
     planDAO.getPlanByUser(req.user.id)
         .then(plan => res.json(plan))
         .catch(err => res.status(500).json(err));
 })
 
-app.post('/api/plans/addPlan', isLoggedIn, PlanValidation(), async (req, res) => {
+app.post('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });
@@ -187,14 +185,13 @@ app.post('/api/plans/addPlan', isLoggedIn, PlanValidation(), async (req, res) =>
     }
 });
 
-app.delete('/api/plans/deletePlan', isLoggedIn, (req, res) => {
-    // TODO: if req.user.available => validation
+app.delete('/api/plans', isLoggedIn, (req, res) => {
     planDAO.deletePlan(req.user.id).then(() => courseDAO.updateStudentsCount()).then(() => userDAO.updateType(null, req.user.id))
         .then(() => res.status(200).json({ message: "Delete success" }))
         .catch(() => res.status(503).send({ errMessage: `Delete went wrong for the user ${req.user.id}` }));
 });
 
-app.put('/api/plans/updatePlan', isLoggedIn, PlanValidation(), async (req, res) => {
+app.put('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ errors: errors.array() });

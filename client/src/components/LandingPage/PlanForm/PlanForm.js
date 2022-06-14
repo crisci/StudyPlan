@@ -6,16 +6,16 @@ function PlanForm(props) {
 
     const [currentCourse, setCurrentCourse] = useState(''); //form's value
     const [planType, setPlanType] = useState(props.type); //1 full time, 0 part time
-    const [boundCrediti, setBoundCrediti] = useState(planType ? {max: 80, min: 40} : {max: 40, min: 20});
+    const [boundCrediti, setBoundCrediti] = useState(planType ? { max: 80, min: 40 } : { max: 40, min: 20 });
     const [error, setError] = useState("");
-    
-    
+
+
     const handleAdd = (event) => {
         event.preventDefault();
         const current = props.courses.find(course => course.codice === currentCourse);
-        if(props.currentCrediti + current.crediti > boundCrediti.max) {
+        if (props.currentCrediti + current.crediti > boundCrediti.max) {
             setError(`Il corso "${current.titolo}" non può essere aggiunto perchè produrrebbe un numero troppo elevato di crediti per il piano di studio selezionato.`)
-        } else if(current.max_studenti === current.tot_studenti) {
+        } else if (current.max_studenti === current.tot_studenti) {
             setError(`Il corso "${current.titolo}" non può essere aggiunto perchè ha raggiunto la soglia massima di studenti.`)
         }
         else {
@@ -36,12 +36,18 @@ function PlanForm(props) {
     }
 
     const handleSave = () => {
-        if (props.add) {
-            props.setAdd(false);
+        if (props.currentCrediti < boundCrediti.min) {
+            setError("Numero di CFU insifficiente per poter salvare il piano di studi.");
+        } else if (props.currentCrediti > boundCrediti.max) {
+            setError("Numero di CFU troppo elevato per poter salvare il piano di studi.");
         } else {
-            props.setEdit(false);
+            if (props.add) {
+                props.setAdd(false);
+            } else {
+                props.setEdit(false);
+            }
+            props.saveCurrentPlan(planType);
         }
-        props.saveCurrentPlan(planType);
     }
 
     function handleSwitchType(value) {
@@ -50,13 +56,13 @@ function PlanForm(props) {
                 if (props.currentCrediti > 40) {
                     setError("Numero di CFU troppo elevato per selezionare l'opzione: Part Time.");
                 } else {
-                    setBoundCrediti({max: 40, min: 20})
+                    setBoundCrediti({ max: 40, min: 20 })
                     setPlanType(value);
                 }
                 break;
 
             default:
-                setBoundCrediti({max: 80, min: 60})
+                setBoundCrediti({ max: 80, min: 60 })
                 setPlanType(value);
                 break;
         }
@@ -64,19 +70,13 @@ function PlanForm(props) {
 
     function handleX(course) {
         if (props.currentPlan.map(p => p.propedeuticita).find(propedeuticita => propedeuticita === course.codice)) {
-            //TODO: find who has propedeuticita
-            setError('Non puoi eliminare il corso poichè propedeutico.')
+            const propedeutico = props.currentPlan.find(cod => cod.propedeuticita === course.codice);
+            setError(`Non puoi eliminare il corso poichè propedeutico a ${propedeutico.titolo}`)
         } else {
             props.deleteCourseFromPlan(course.codice, course.crediti);
         }
     }
 
-    function disableSave() {
-        if(props.currentCrediti < boundCrediti.min || props.currentCrediti > boundCrediti.max) {
-            return true;
-        }
-        return false;
-    }
 
     return (
         <div>
@@ -111,7 +111,7 @@ function PlanForm(props) {
                         </Form.Group>
                     </Col>
                     <Col className="col-md-1">
-                        <Button className="m-auto w-75 text-center rounded-pill" type='submit' onClick={handleAdd} disabled={!currentCourse}> Add </Button>
+                        <Button className="m-auto w-75 text-center rounded-pill" type='submit' onClick={handleAdd} > Add </Button>
                     </Col>
                 </Row>
             </Form>
@@ -126,7 +126,7 @@ function PlanForm(props) {
             </Row>
             <Row className="justify-content-center">
                 <Col className="col-md-1"> <Button className="rounded-pill w-100" variant="danger" onClick={handleCancel}> Cancel </Button> </Col>
-                <Col className="col-md-1"> <Button className="rounded-pill w-100" variant="success" onClick={handleSave} disabled={disableSave()}> Save </Button></Col>
+                <Col className="col-md-1"> <Button className="rounded-pill w-100" variant="success" onClick={handleSave} > Save </Button></Col>
             </Row>
         </div>
     )

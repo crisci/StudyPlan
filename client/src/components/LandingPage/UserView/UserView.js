@@ -32,7 +32,7 @@ function StudyPlanAvailable(props) {
         <>
             {
                 !props.edit
-                    ? <Container>
+                    ? <Container fluid>
                         <p style={{ fontWeight: "600", fontSize: "1.8rem", margin: "0" }}> Your current plan </p>
                         <p style={{ fontWeight: "400", fontSize: "1.2rem", margin: "0" }}> Type: {props.type ? "Full Time" : "Part Time"}</p>
                         <p style={{ fontWeight: "400", fontSize: "1.2rem", margin: "0" }}> Totale CFU: {props.crediti}</p>
@@ -43,7 +43,7 @@ function StudyPlanAvailable(props) {
                                 <Container>CFU</Container>
                             </ListGroup.Item>
                             {props.plan
-                                ?.map(p => <ListGroup.Item key={p.codice} as='li' className="d-flex justify-content-beetween mb-3">
+                                ?.map(p => <ListGroup.Item key={p.codice} as='li' className="d-flex mb-3">
                                     <Container>{p.codice}</Container>
                                     <Container>{p.titolo}</Container>
                                     <Container>{p.crediti}</Container>

@@ -24,7 +24,7 @@ function getPlan() {
 
 function addPlan(plan, type) {
   return new Promise((resolve, reject) => {
-    fetch(`${APIURL}/plans/addPlan`,
+    fetch(`${APIURL}/plans`,
       {
         method: 'POST',
         credentials: 'include',
@@ -44,7 +44,7 @@ function addPlan(plan, type) {
 
 function updateCurrentPlan(plan, type) {
   return new Promise((resolve, reject) => {
-    fetch(`${APIURL}/plans/updatePlan`,
+    fetch(`${APIURL}/plans`,
       {
         method: 'PUT',
         credentials: 'include',
@@ -65,7 +65,7 @@ function updateCurrentPlan(plan, type) {
 
 function deletePlan() {
   return new Promise((resolve, reject) => {
-    fetch(`${APIURL}/plans/deletePlan`,
+    fetch(`${APIURL}/plans`,
       {
         method: 'DELETE',
         credentials: 'include'
@@ -80,24 +80,19 @@ function deletePlan() {
   });
 }
 
-//  ! If you want to use return Promise
-//  ! remember to resolve(something).
 async function logIn(credentials) {
-  let response = await fetch(`${APIURL}/sessions`, {
+  return fetch(`${APIURL}/sessions`, {
     method: 'POST',
     credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
     },
-    body: JSON.stringify(credentials),
-  });
-  if (response.ok) {
-    const user = await response.json();
-    return user;
-  } else {
-    const errDetail = await response.json();
-    throw errDetail.message;
-  }
+    body: JSON.stringify(credentials)
+}).then(async res => {
+    if (res.ok)
+        return res.json();
+    throw await res.json();
+});
 }
 
 

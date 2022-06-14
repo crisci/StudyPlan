@@ -74,7 +74,6 @@ function CourseItem(props) {
                 setWarningMessage("");
                 setSelected(false);
             }
-            //TODO: chiedi se va bene
         }, [props.course, props.currentPlan, props.add, props.edit])
     
 
@@ -96,14 +95,17 @@ function CourseItem(props) {
             }>
             <Container>{props.course.codice}</Container>
             <Container>
+                <span>
+
                 {props.course.titolo}
+                </span>
                 {warningMessage
                     ? <OverlayButton showInformation={warningMessage} /> : false
                 }
             </Container>
             <Container>{props.course.crediti}</Container>
             <Container>{props.course.tot_studenti}</Container>
-            <Container>{props.course.max_studenti}</Container>
+            <Container>{props.course.max_studenti ? props.course.max_studenti : "-"}</Container>
             {
                 description
                     ? <Container>

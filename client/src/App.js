@@ -8,11 +8,24 @@ import LandingPage from './components/LandingPage/LandingPage';
 import { useEffect, useState } from 'react';
 import API from './API';
 import PlanForm from './components/LandingPage/PlanForm/PlanForm';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 function App() {
   return (
     <>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover={false}
+      />
       <Router>
         <MainApp />
       </Router>
@@ -81,24 +94,34 @@ function MainApp() {
         setLoggedIn(true);
         setUser(user);
       } catch (err) {
-        console.error(err.errMessage);
+        console.error(err.error);
       }
     };
 
     checkAuth();
   }, []);
 
-  const doLogIn = (credentials) => {
-    API.logIn(credentials)
+
+
+  const doLogIn = async (credentials) => {
+    return API.logIn(credentials)
       .then(user => {
         setLoggedIn(true);
         setUser(user);
         navigate('/');
       })
-      .catch(err => {
-        console.log(err);
-      }
-      )
+  }
+
+  const notifyError = (errMessage) => {
+    toast.error(errMessage, {
+      position: "bottom-right",
+      autoClose: 2500,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: true,
+      progress: undefined,
+    });
   }
 
   const doLogOut = async () => {
@@ -117,13 +140,13 @@ function MainApp() {
 
   const addCourseToPlan = (course) => {
     setCurrentPlan(oldPlan => [...oldPlan, course]);
-    setCourses(oldCourses => oldCourses.map(c => course.codice === c.codice ? {...course, tot_studenti: course.tot_studenti + 1} : c));
+    setCourses(oldCourses => oldCourses.map(c => course.codice === c.codice ? { ...course, tot_studenti: course.tot_studenti + 1 } : c));
     setCurrentCrediti(oldCrediti => oldCrediti + course.crediti);
   }
 
   const deleteCourseFromPlan = (codice, crediti) => {
     setCurrentPlan(currentPlan.filter(p => p.codice !== codice));
-    setCourses(oldCourses => oldCourses.map(course => course.codice === codice ? {...course, tot_studenti: course.tot_studenti - 1} : course));
+    setCourses(oldCourses => oldCourses.map(course => course.codice === codice ? { ...course, tot_studenti: course.tot_studenti - 1 } : course));
     setCurrentCrediti(oldCrediti => oldCrediti - crediti);
   }
 
@@ -131,7 +154,7 @@ function MainApp() {
     setCurrentPlan(plan ? plan : []);
     setDirty(true); //in the meantime something could change (n-clients problems).
     setCurrentCrediti(crediti);
-    navigate('/'); 
+    navigate('/');
   }
 
 
@@ -148,12 +171,21 @@ function MainApp() {
       setDirty(true);
       navigate('/');
     } catch (error) {
-        console.error(error);
-        //TODO: handle error on validation. Generic error like:
-        // * Something went wrong. Maybe the plan is not valid.
-        // * Do not navigate to ('/') and not setDirty
-        // * It remains on the same page and there will be a notification 
-        // * that something went wrong.
+      console.error(error);
+      toast('🦄 Wow so easy!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      //TODO: handle error on validation. Generic error like:
+      // * Something went wrong. Maybe the plan is not valid.
+      // * Do not navigate to ('/') and not setDirty
+      // * It remains on the same page and there will be a notification 
+      // * that something went wrong.
     }
   }
 
@@ -166,6 +198,7 @@ function MainApp() {
   }
 
   return (
+
     <Routes>
       <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} deletePlan={deletePlan} coursesLoading={coursesLoading} />} >
         <Route path="editPlan" element={!loggedIn

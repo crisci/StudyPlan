@@ -27,7 +27,7 @@ function LoginForm(props) {
             setErrorMessage('Password is mandatory.')
         } else {
             //login
-            props.login({ username: username, password: password });
+            props.login({ username, password }).catch(err => {setErrorMessage(err.message)});
         }
     }
 
@@ -44,7 +44,7 @@ function LoginForm(props) {
                         : ''}
                     <Form noValidate onSubmit={handleSubmit}>
                         <Form.Group className="mb-3" controlId='username'>
-                            <Form.Label>username address</Form.Label>
+                            <Form.Label>Email</Form.Label>
                             <Form.Control type="username" value={username} onChange={(event) => { setUsername(event.target.value) }} />
                         </Form.Group>
                         <Form.Group controlId='password'>
