@@ -139,6 +139,7 @@ function MainApp() {
     setAdd(false);
     setEdit(false);
     navigate('/userPage');
+    navigate('/');
   }
 
   const saveCurrentPlan = async (type) => {
@@ -154,7 +155,10 @@ function MainApp() {
       setDirty(true);
       navigate('/');
     } catch (error) {
-      console.error(error.errMessage);
+      console.error(error.error);
+      setAdd(false);
+      setEdit(false);
+      navigate('/');
     }
   }
 
@@ -163,7 +167,11 @@ function MainApp() {
     API.deletePlan().then(() => {
       setUser({ ...user, available: null });
       setDirty(true);
-    })
+    }).catch((err) => {
+      console.error(err.error);
+      setAdd(false);
+      setEdit(false);
+    });
   }
 
   return (

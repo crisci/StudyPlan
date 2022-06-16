@@ -1,7 +1,7 @@
 import { Container } from "react-bootstrap";
 import Nav from "./Navbar/Navbar";
 import CourseList from "./CourseList/CourseList";
-import UserView from "./UserView/UserView";
+import UserView from "./UserView";
 import { Outlet } from "react-router-dom";
 
 

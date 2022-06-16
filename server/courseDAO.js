@@ -13,6 +13,15 @@ exports.getAllCourses = () => {
     });
 }
 
+exports.getMaxStudents = (code) => {
+    return new Promise((resolve, reject) => {
+        db.get(`SELECT * FROM courses WHERE codice = ?`, [code], (err, row) => {
+            if (err) reject(err);
+            resolve(row);
+        })
+    });
+}
+
 exports.getAllCoursesCode = () => {
     return new Promise((resolve, reject) => {
         db.all(`SELECT codice FROM courses`, (err, rows) => {

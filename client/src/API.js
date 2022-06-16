@@ -36,9 +36,9 @@ function addPlan(plan, type) {
         if (response.ok) {
           resolve(null);
         } else {
-          response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
+          response.json().then(error => reject(error)).catch(() => reject({ error: "Cannot parse server response." }));
         }
-      }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
+      }).catch(() => resolve({ error: "Unable to comunicate with the server." }));
   });
 }
 
@@ -56,9 +56,9 @@ function updateCurrentPlan(plan, type) {
         if (response.ok) {
           resolve(null);
         } else {
-          response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
+          response.json().then(error => reject(error)).catch(() => reject({ error: "Cannot parse server response." }));
         }
-      }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
+      }).catch(() => resolve({ error: "Unable to comunicate with the server." }));
   });
 }
 
@@ -74,9 +74,9 @@ function deletePlan() {
       if (response.ok) {
         resolve(null);
       } else {
-        response.json().then(error => reject({ errMessage: error }).catch(() => reject({ errorMessage: "Cannot parse server response." })));
+        response.json().then(error => reject(error)).catch(() => reject({ error: "Cannot parse server response." }));
       }
-    }).catch(() => resolve({ errMessage: "Unable to comunicate with the server." }));
+    }).catch(() => reject({ error: "Unable to comunicate with the server." }));
   });
 }
 
@@ -110,7 +110,7 @@ function getUserInfo() {
           } else {
             reject(resJSON);
           }
-        }).catch(() => reject("Unable to parse user datas."));
+        }).catch(() => reject({error: "Unable to parse user datas."}));
     });
   });
 }

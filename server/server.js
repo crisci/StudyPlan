@@ -52,7 +52,7 @@ const isLoggedIn = (req, res, next) => {
     if (req.isAuthenticated())
         return next();
 
-    return res.status(401).json({ error: 'not authenticated' });
+    return res.status(401).json({ error: 'Not Authenticated!' });
 }
 
 app.use(cors(corsOptions));
@@ -69,6 +69,14 @@ async function checkCode(value) {
         return true;
     }
     return false;
+}
+
+async function checkMaxStudents(code) {
+    const record = await courseDAO.getMaxStudents(code);
+    if (record.tot_studenti >= record.max_studenti && record.max_studenti !== null) {
+        return false;
+    }
+    return true;
 }
 
 function PlanValidation() {
@@ -111,10 +119,11 @@ function PlanValidation() {
             }),
         body('plan.*')
             .optional()
-            .if(val => val.max_studenti != null)
-            .custom((value) => {
-                if (value.tot_studenti >= value.max_studenti) {
-                    throw new Error('Too many students.');
+            .if(val => val.max_studenti !== null)
+            .custom(async (value) => {
+                const check = await checkMaxStudents(value.codice);
+                if (!check) {
+                    throw 'Too many students.';
                 }
                 return true;
             })
@@ -172,7 +181,7 @@ app.get('/api/plans', isLoggedIn, (req, res) => {
 app.post('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
+        return res.status(422).json({ errors: errors.array()[0] });
     }
     try {
         await Promise.all(req.body.plan.map(course => planDAO.addCourseToPlan(req.user.id, course.codice))); //array of proms that execute the query for the single course
@@ -191,10 +200,11 @@ app.delete('/api/plans', isLoggedIn, (req, res) => {
         .catch(() => res.status(503).send({ errMessage: `Delete went wrong for the user ${req.user.id}` }));
 });
 
-app.put('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => {
+app.put('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => { 
     const errors = validationResult(req);
+    
     if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array() });
+        return res.status(422).json({ errors: errors.array()[0] });
     }
     try {
         await planDAO.deletePlan(req.user.id);
