@@ -8,6 +8,7 @@ function PlanForm(props) {
     const [planType, setPlanType] = useState(props.type); //1 full time, 0 part time
     const [boundCrediti, setBoundCrediti] = useState(planType ? { max: 80, min: 40 } : { max: 40, min: 20 });
     const [error, setError] = useState("");
+    //TODO: reset the error when something is done without errors (?)
 
 
     const handleAdd = (event) => {
@@ -21,6 +22,7 @@ function PlanForm(props) {
         else {
             props.addCourseToPlan(current);
             setCurrentCourse('');
+            setError('');
         }
 
     }
@@ -71,7 +73,7 @@ function PlanForm(props) {
     function handleX(course) {
         if (props.currentPlan.map(p => p.propedeuticita).find(propedeuticita => propedeuticita === course.codice)) {
             const propedeutico = props.currentPlan.find(cod => cod.propedeuticita === course.codice);
-            setError(`Non puoi eliminare il corso poichè propedeutico a ${propedeutico.titolo}`)
+            setError(`Non puoi eliminare il corso poichè propedeutico ad "${propedeutico.titolo}"`)
         } else {
             props.deleteCourseFromPlan(course.codice, course.crediti);
         }
@@ -83,11 +85,19 @@ function PlanForm(props) {
             <p style={{ fontWeight: "600", fontSize: "3.5rem", margin: "0", paddingBottom: "10px" }}> {props.add ? "Add Plan" : "Edit Plan"}</p>
             <Row className="w-100 m-auto">
                 {error ? <Alert className="w-25 m-auto mb-3" variant='danger' onClose={() => { setError(''); }} dismissible>{error}</Alert> : false}
+                    {planType !== null 
+                        ? <p style={{fontSize: "2rem"}}>Plan type: <span style={{fontWeight:"600"}}>{planType ? "Full Time" : "Part Time"}</span></p>
+                        : <p style={{fontSize: "2rem", fontWeight:"400"}}>Seleziona il piano di studi per continuare</p>}
                 <Container className="mb-3">
-                    <Button className="m-auto text-center rounded-pill me-2" onClick={() => handleSwitchType(1)}>Full Time</Button>
-                    <Button className="m-auto text-center rounded-pill ms-2" onClick={() => handleSwitchType(0)}>Part Time</Button>
+                    {
+                        props.type !== null
+                            ? false
+                            : <> 
+                                <Button className="m-auto text-center rounded-pill me-2" onClick={() => handleSwitchType(1)}>Full Time</Button>
+                                <Button className="m-auto text-center rounded-pill ms-2" onClick={() => handleSwitchType(0)}>Part Time</Button>
+                            </>
+                    }
                 </Container>
-                <p>{planType !== null ? planType ? "Type select: Full Time" : "Type select: Part Time" : "Seleziona il piano di studi per continuare"}</p>
             </Row>
             <Form onSubmit={handleAdd} className="d-flex m-auto mb-3">
                 <Row className="justify-content-center w-100">
