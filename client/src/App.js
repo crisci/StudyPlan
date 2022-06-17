@@ -139,7 +139,6 @@ function MainApp() {
     setAdd(false);
     setEdit(false);
     navigate('/userPage');
-    navigate('/');
   }
 
   const saveCurrentPlan = async (type) => {
