@@ -6,9 +6,8 @@ function PlanForm(props) {
 
     const [currentCourse, setCurrentCourse] = useState(''); //form's value
     const [planType, setPlanType] = useState(props.type); //1 full time, 0 part time
-    const [boundCrediti, setBoundCrediti] = useState(planType ? { max: 80, min: 40 } : { max: 40, min: 20 });
+    const [boundCrediti, setBoundCrediti] = useState(planType ? { max: 80, min: 60 } : { max: 40, min: 20 });
     const [error, setError] = useState("");
-    //TODO: reset the error when something is done without errors (?)
 
 
     const handleAdd = (event) => {
@@ -43,11 +42,6 @@ function PlanForm(props) {
         } else if (props.currentCrediti > boundCrediti.max) {
             setError("Numero di CFU troppo elevato per poter salvare il piano di studi.");
         } else {
-            if (props.add) {
-                props.setAdd(false);
-            } else {
-                props.setEdit(false);
-            }
             props.saveCurrentPlan(planType);
         }
     }
@@ -86,11 +80,11 @@ function PlanForm(props) {
             <Row className="w-100 m-auto">
                 {error ? <Alert className="w-25 m-auto mb-3" variant='danger' onClose={() => { setError(''); }} dismissible>{error}</Alert> : false}
                     {planType !== null 
-                        ? <p style={{fontSize: "2rem"}}>Plan type: <span style={{fontWeight:"600"}}>{planType ? "Full Time" : "Part Time"}</span></p>
+                        ? <p style={{fontSize: "2rem"}}>Plan type selected: <span style={{fontWeight:"600"}}>{planType ? "Full Time" : "Part Time"}</span></p>
                         : <p style={{fontSize: "2rem", fontWeight:"400"}}>Seleziona il piano di studi per continuare</p>}
                 <Container className="mb-3">
                     {
-                        props.type !== null
+                        planType !== null
                             ? false
                             : <> 
                                 <Button className="m-auto text-center rounded-pill me-2" onClick={() => handleSwitchType(1)}>Full Time</Button>

@@ -1,11 +1,14 @@
-import { Container, Navbar } from "react-bootstrap";
+import { Button, Container, Navbar } from "react-bootstrap";
 import { FaUserGraduate } from 'react-icons/fa';
-import { BsPersonCircle } from 'react-icons/bs';
 import { useNavigate } from "react-router-dom";
 
 
 function Nav(props) {
     const navigate = useNavigate();
+
+    function handleLogout() {
+        props.doLogOut();
+    }
 
     return (
         <Navbar bg="primary" variant="dark" className="navbar navbar-dark bg-primary fixed-top">
@@ -13,7 +16,11 @@ function Nav(props) {
                 <Navbar.Brand >
                     <FaUserGraduate className="mb-1" size='20px' />{' '}myPlan
                 </Navbar.Brand>
-                <BsPersonCircle style={{ cursor: "pointer" }} color='white' size='30px' onClick={() => { props.user?.id ? props.navigateToUserPage() : navigate('/login') }} />
+                <Button variant={props.user?.id ? "danger" :"light"} size='30px' className="rounded-pill" onClick={() => { props.user?.id ? handleLogout() : navigate('/login') }}>
+                    {
+                        props.user?.id ? "Logout" : "Login"
+                    }
+                </Button>
             </Container>
         </Navbar >
     );

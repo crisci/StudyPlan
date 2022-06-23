@@ -7,7 +7,7 @@ db.run(`PRAGMA foreign_key = ON`);
 //get plan related to the user
 exports.getPlanByUser = (userId) => {
     return new Promise((resolve, reject) => {
-        db.all('SELECT courseId, titolo, crediti FROM users LEFT JOIN plans ON users.id = plans.userId LEFT JOIN courses ON plans.courseId = courses.codice WHERE id = ? ORDER BY titolo ASC',
+        db.all('SELECT courseId, titolo, crediti, incompatibilita, propedeuticita FROM users LEFT JOIN plans ON users.id = plans.userId LEFT JOIN courses ON plans.courseId = courses.codice WHERE id = ? ORDER BY titolo ASC',
             [userId], (err, rows) => {
                 if (err) {
                     reject(err);
@@ -15,7 +15,7 @@ exports.getPlanByUser = (userId) => {
                     if (rows === undefined) {
                         resolve({ error: "user not found" });
                     } else {
-                        const userPlan = rows.filter(row => row.courseId !== null).map(row => Object.assign({}, { codice: row.courseId, titolo: row.titolo, crediti: row.crediti }));
+                        const userPlan = rows.filter(row => row.courseId !== null).map(row => Object.assign({}, { codice: row.courseId, titolo: row.titolo, crediti: row.crediti, incompatibilita: row.incompatibilita, propedeuticita: row.propedeuticita }));
                         resolve(userPlan);
                     }
                 }

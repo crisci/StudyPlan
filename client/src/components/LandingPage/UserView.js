@@ -1,4 +1,4 @@
-import { Button, Container, ListGroup } from "react-bootstrap";
+import { Alert, Button, Container, ListGroup, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 function UserView(props) {
@@ -6,8 +6,20 @@ function UserView(props) {
     return (
         <Container fluid>
             <h2>Welcome, {props.user?.nome}</h2>
+            {props.netError
+
+                ? <Alert className="w-25 m-auto" variant="danger" onClose={() => {props.resetError()}} dismissible>
+                    <Alert.Heading>You got an error!</Alert.Heading>
+                    <p>
+                        {props.netError}
+                    </p>
+                </Alert>
+                : false
+            }
             {(props.plan?.length)
-                ? <StudyPlanAvailable type={props.user.available} crediti={props.crediti} edit={props.edit} setEdit={props.setEdit} plan={props.plan} deletePlan={props.deletePlan}/>
+                ? !props.planLoading
+                    ? <StudyPlanAvailable type={props.user.available} crediti={props.crediti} edit={props.edit} setEdit={props.setEdit} plan={props.plan} deletePlan={props.deletePlan} />
+                    : <Spinner animation="border" variant="primary" />
                 : <StudyPlanNotAvailable setAdd={props.setAdd} add={props.add} />}
         </Container>
     )
@@ -76,8 +88,8 @@ function StudyPlanNotAvailable(props) {
                 !props.add
                     ? <Container fluid className="px-4 ">
                         <p style={{ fontWeight: "600", fontSize: "1.8rem", margin: "0" }}> Study plan not available! </p>
-                        <p style={{ fontSize: "1.4rem" }}> Click the button down below to add it. </p>
-                        <Button variant="primary" style={{ width: "10rem", borderRadius: "2rem" }} onClick={handleAdd}>Add</Button>
+                        <p style={{ fontSize: "1.4rem" }}> Click the button down below to create it. </p>
+                        <Button variant="primary" style={{ width: "10rem", borderRadius: "2rem" }} onClick={handleAdd}>Create</Button>
                     </Container>
                     : false
             }

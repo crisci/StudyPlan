@@ -1,3 +1,5 @@
+'use strict';
+
 const express = require('express');
 const morgan = require('morgan');
 const { json, download } = require('express/lib/response');
@@ -71,44 +73,64 @@ async function checkCode(value) {
     return false;
 }
 
-async function checkMaxStudents(code) {
+async function checkMaxStudents(code, userId) {
     const record = await courseDAO.getMaxStudents(code);
-    if (record.tot_studenti >= record.max_studenti && record.max_studenti !== null) {
-        return false;
+    const currentPlan = await planDAO.getPlanByUser(userId);
+    if (!currentPlan?.map(p => p.codice).includes(code)) {
+        if (record.tot_studenti >= record.max_studenti && record.max_studenti !== null) {
+            return false;
+        }
     }
     return true;
 }
+
+async function checkPlan(row, plan) {
+    const courses = await courseDAO.getAllCourses();
+    const planCodes = plan.map(p => p.codice);
+    if(!(row.crediti === courses.find(c => c.codice === row.codice).crediti)) {
+        return 'Crediti mismatch error.';
+    }
+    if (row.incompatibilita?.split('\n').some(value => planCodes.includes(value)) && row.incompatibilita !== null) {
+        return 'Incompatibility error found in the plan.';
+    }
+    if (!row.propedeuticita?.split('\n').some(value => planCodes.includes(value)) && row.propedeuticita !== null) {
+        return 'Propedeutic error found in the plan.';
+    }
+    return false;
+}
+
+
 
 function PlanValidation() {
 
     return [
         body('available')
-            .exists().withMessage('Plan type must be present')
-            .isInt([0, 1]).withMessage("Plan type not available."),
+            .exists().withMessage('Plan type must be present').bail()
+            .isInt([0, 1]).withMessage("Plan type not available.").bail(),
         body('plan.*.codice')
-            .exists().withMessage("Codice must be preset.")
-            .isString().withMessage("Codice must be a string.")
-            .isLength({ min: 7, max: 7 }).withMessage("Codice length not valid.")
+            .exists().withMessage("Codice must be preset.").bail()
+            .isString().withMessage("Codice must be a string.").bail()
+            .isLength({ min: 7, max: 7 }).withMessage("Codice length not valid.").bail()
             .custom(async (value) => {
                 const check = await checkCode(value);
                 if (!check) {
                     throw new Error('Code doenst match with any courses');
                 }
                 return true;
-            })
+            }).bail()
         ,
         body('plan.*.tot_studenti')
             .optional({ nullable: true })
             .isInt()
-            .withMessage('Tot studenti invalid value.'),
+            .withMessage('Tot studenti invalid value.').bail(),
         body('plan.*.max_studenti')
             .optional({ nullable: true })
-            .isInt().withMessage('Max studenti invalid value.'),
+            .isInt().withMessage('Max studenti invalid value.').bail(),
         body('plan.*.crediti')
-            .exists().withMessage('Crediti must be present.')
-            .isInt().withMessage('Crediti invalid value.'),
+            .exists().withMessage('Crediti must be present.').bail()
+            .isInt().withMessage('Crediti invalid value.').bail(),
         body('plan')
-            .isArray().withMessage('Plan invalid format')
+            .isArray().withMessage('Plan invalid format').bail()
             .custom((value, { req }) => {
                 const max_crediti = req.body.available ? { min: 60, max: 80 } : { min: 20, max: 40 };
                 const planCredits = value.map(p => p.crediti).reduce((prev, next) => prev + next, 0);
@@ -116,17 +138,25 @@ function PlanValidation() {
                     throw new Error('Number of credit out of bound.');
                 }
                 return true;
-            }),
+            }).bail(),
         body('plan.*')
             .optional()
-            .if(val => val.max_studenti !== null)
-            .custom(async (value) => {
-                const check = await checkMaxStudents(value.codice);
+            .custom(async (row, { req }) => {
+                const check = await checkPlan(row, req.body.plan);
+                if(check) {
+                    throw check;
+                }
+                return true;
+            }).bail()
+            .if(row => row.max_studenti !== null)
+            .custom(async (row, { req }) => {
+                const check = await checkMaxStudents(row.codice, req.user.id);
                 if (!check) {
                     throw 'Too many students.';
                 }
                 return true;
-            })
+            }).bail(),
+
     ]
 }
 
@@ -146,7 +176,7 @@ app.post('/api/sessions', [
 ], function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ message: errors.array()[0].msg });
+        return res.status(422).json({ error: errors.array()[0].msg });
     }
     passport.authenticate('local', (err, user, info) => {
         if (err) return next(err);
@@ -181,7 +211,7 @@ app.get('/api/plans', isLoggedIn, (req, res) => {
 app.post('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array()[0] });
+        return res.status(422).json({ error: errors.array()[0].msg });
     }
     try {
         await Promise.all(req.body.plan.map(course => planDAO.addCourseToPlan(req.user.id, course.codice))); //array of proms that execute the query for the single course
@@ -200,11 +230,10 @@ app.delete('/api/plans', isLoggedIn, (req, res) => {
         .catch(() => res.status(503).send({ errMessage: `Delete went wrong for the user ${req.user.id}` }));
 });
 
-app.put('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => { 
+app.put('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => {
     const errors = validationResult(req);
-    
     if (!errors.isEmpty()) {
-        return res.status(422).json({ errors: errors.array()[0] });
+        return res.status(422).json({ error: errors.array()[0].msg });
     }
     try {
         await planDAO.deletePlan(req.user.id);
@@ -219,7 +248,7 @@ app.put('/api/plans', isLoggedIn, PlanValidation(), async (req, res) => {
 });
 
 
+// activate the server
 app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
-})
-
+    console.log(`Server listening at http://localhost:${port}`);
+});

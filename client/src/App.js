@@ -3,11 +3,10 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route, useNavigate, Navigate } from 'react-router-dom';
 import PageNotFound from './components/PageNotFound/PageNotFound';
 import LoginForm from './components/LoginForm/LoginForm';
-import UserPage from './components/UserPage/UserPage';
 import LandingPage from './components/LandingPage/LandingPage';
 import { useEffect, useState } from 'react';
 import API from './API';
-import PlanForm from './components/LandingPage/PlanForm/PlanForm';
+import PlanForm from './components/LandingPage/PlanForm';
 import 'react-toastify/dist/ReactToastify.css';
 
 
@@ -27,16 +26,22 @@ function MainApp() {
 
   const [user, setUser] = useState({});
   const [loggedIn, setLoggedIn] = useState(false);
+  
   const [courses, setCourses] = useState([]);
   const [plan, setPlan] = useState(); //used to store the database informations
   const [crediti, setCrediti] = useState();
+  
   const [currentType, setCurrentType] = useState();  //0 full time, 1 part time
   const [currentPlan, setCurrentPlan] = useState([]); //used for the visualization in PlanForm
   const [currentCrediti, setCurrentCrediti] = useState(0); //keep trak of the added courses, if unde the edit, nothing change.
+
   const [coursesLoading, setCoursesLoading] = useState(false);
+  const [planLoading, setPlanLoading] = useState(false);
+  
   const [add, setAdd] = useState(false);
   const [edit, setEdit] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [netError, setNetError] = useState("");
 
   useEffect(() => {
     setCoursesLoading(true);
@@ -60,6 +65,7 @@ function MainApp() {
             setCurrentCrediti(plan ? plan.map(p => p.crediti).reduce(((accumulator, value) => accumulator + value), 0) : 0);
             setCurrentType(user.available);
             setDirty(false);
+            setPlanLoading(false);
           } else {
             setPlan(); // = undefinded
             setCurrentPlan([]);
@@ -67,6 +73,7 @@ function MainApp() {
             setCrediti(0);
             setCurrentType(null);
             setDirty(false);
+            setPlanLoading(false);
           }
         }
       )
@@ -82,7 +89,8 @@ function MainApp() {
         setLoggedIn(true);
         setUser(user);
       } catch (err) {
-        console.error(err.error);
+        if (err.error !== "Unauthenticated user!") 
+          console.error(err.error);
       }
     };
 
@@ -109,8 +117,9 @@ function MainApp() {
     setCurrentType();
     setCurrentPlan([]);
     setCurrentCrediti(0);
-    setAdd(0);
-    setEdit(0);
+    setAdd(false);
+    setEdit(false);
+    setDirty(true);
     navigate('/');
   }
 
@@ -133,15 +142,8 @@ function MainApp() {
     navigate('/');
   }
 
-  const navigateToUserPage = () => {
-    setCurrentPlan(plan ? plan : []);
-    setCurrentCrediti(crediti);
-    setAdd(false);
-    setEdit(false);
-    navigate('/userPage');
-  }
-
   const saveCurrentPlan = async (type) => {
+    setPlanLoading(true);
     try {
       if (add) {
         await API.addPlan(currentPlan, type);
@@ -154,9 +156,11 @@ function MainApp() {
       setDirty(true);
       navigate('/');
     } catch (error) {
-      console.error(error.error);
+      handleError(error);
       setAdd(false);
       setEdit(false);
+      setPlanLoading(false);
+      setDirty(true);
       navigate('/');
     }
   }
@@ -167,23 +171,30 @@ function MainApp() {
       setUser({ ...user, available: null });
       setDirty(true);
     }).catch((err) => {
-      console.error(err.error);
+      handleError(err.error);
       setAdd(false);
       setEdit(false);
     });
   }
 
+  const handleError = (err) => {
+    setNetError(err.error);
+  }
+
+  const resetError = () => {
+    setNetError("");
+  }
+
   return (
 
     <Routes>
-      <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} deletePlan={deletePlan} coursesLoading={coursesLoading} navigateToUserPage={navigateToUserPage}/>} >
+      <Route path="/" element={<LandingPage user={user} courses={courses} currentPlan={currentPlan} plan={plan} crediti={crediti} add={add} setAdd={setAdd} edit={edit} setEdit={setEdit} deletePlan={deletePlan} coursesLoading={coursesLoading} planLoading={planLoading} doLogOut={doLogOut} netError={netError} resetError={resetError}/>} >
         <Route path="editPlan" element={!loggedIn
           ? <Navigate to='/login' />
           : <PlanForm type={user.available} currentPlan={currentPlan} courses={courses} currentType={currentType}
             addCourseToPlan={addCourseToPlan} cancelCurrentPlan={cancelCurrentPlan} deleteCourseFromPlan={deleteCourseFromPlan}
             saveCurrentPlan={saveCurrentPlan} currentCrediti={currentCrediti} add={add} setAdd={setAdd} setEdit={setEdit} />} />
       </Route>
-      <Route path="/userPage" element={!loggedIn ? <Navigate to="/login" /> : <UserPage user={user} logout={doLogOut} />} />
       <Route path="/login" element={loggedIn ? <Navigate to="/" /> : <LoginForm login={doLogIn} />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
