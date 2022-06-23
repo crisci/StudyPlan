@@ -1,5 +1,5 @@
 # Exam #1: "Piano di studi"
-## Student: s303109 CRISCI LUIGI 
+## Student: CRISCI LUIGI 
 
 ## __React Client Application Routes__
 
